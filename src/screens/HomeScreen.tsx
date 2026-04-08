@@ -16,6 +16,7 @@ import { RootStackParamList } from '../navigation/AppNavigator';
 import BottomNavBar from '../components/BottomNavBar';
 import FloatingAskBar from '../components/FloatingAskBar';
 import AskAIBottomSheet from '../components/AskAIBottomSheet';
+import { uiColors, uiSpacing, uiTypography } from '../theme/ui';
 
 type HomeScreenNavigationProp = StackNavigationProp<RootStackParamList, 'Home'>;
 
@@ -50,19 +51,19 @@ const COLORS = {
 const TRENDING_BOOKS: BookCard[] = [
   {
     id: 'trending-1',
-    title: 'Atomic Habits',
+    title: 'Thói quen nguyên tử',
     author: 'James Clear',
     image: require('../assets/home/home-2.jpg'),
   },
   {
     id: 'trending-2',
-    title: 'The Alchemist',
+    title: 'Nhà giả kim',
     author: 'Paulo Coelho',
     image: require('../assets/home/home-3.jpg'),
   },
   {
     id: 'trending-3',
-    title: 'Deep Work',
+    title: 'Làm việc sâu',
     author: 'Cal Newport',
     image: require('../assets/home/home-4.jpg'),
   },
@@ -71,13 +72,13 @@ const TRENDING_BOOKS: BookCard[] = [
 const RECOMMENDED_BOOKS: BookCard[] = [
   {
     id: 'rec-1',
-    title: 'Focus',
+    title: 'Tập trung',
     author: 'Daniel Goleman',
     image: require('../assets/home/home-5.jpg'),
   },
   {
     id: 'rec-2',
-    title: 'The 5 AM Club',
+    title: 'Câu lạc bộ 5 giờ sáng',
     author: 'Robin Sharma',
     image: require('../assets/home/home-6.jpg'),
   },
@@ -110,6 +111,11 @@ const TOPICS = [
 export default function HomeScreen({ navigation }: HomeScreenProps) {
   const [askModalVisible, setAskModalVisible] = useState(false);
 
+  const openAskChat = (initialPrompt?: string) => {
+    setAskModalVisible(false);
+    navigation.navigate('AskAI', { initialPrompt });
+  };
+
   return (
     <SafeAreaView style={styles.safeArea}>
       <View style={styles.header}>
@@ -117,7 +123,10 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
           <Text style={styles.greeting}>Chào buổi tối, Alex</Text>
           <Text style={styles.headerTitle}>Sẵn sàng học điều mới hôm nay?</Text>
         </View>
-        <Pressable style={styles.notificationButton}>
+        <Pressable
+          style={styles.notificationButton}
+          onPress={() => navigation.navigate('Notifications')}
+        >
           <MaterialIcons name="notifications-none" size={23} color={COLORS.text} />
         </Pressable>
       </View>
@@ -155,9 +164,9 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
           <Pressable
             style={styles.continueCard}
             onPress={() =>
-              navigation.navigate('Reader', {
-                bookId: 'book-continue-1',
-                title: 'Sapiens',
+              navigation.navigate('BookDetail', {
+                title: 'Sapiens: Lược sử loài người',
+                author: 'Yuval Noah Harari',
               })
             }
           >
@@ -179,7 +188,7 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
         <View>
           <View style={styles.sectionHeaderRow}>
             <Text style={styles.sectionTitle}>Xu hướng hiện tại</Text>
-            <Pressable>
+            <Pressable onPress={() => navigation.navigate('TrendingNow')}>
               <Text style={styles.seeAllText}>Xem tất cả</Text>
             </Pressable>
           </View>
@@ -250,7 +259,11 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
             contentContainerStyle={styles.collectionsRow}
           >
             {COLLECTIONS.map((collection) => (
-              <Pressable key={collection.id} style={styles.collectionCard}>
+              <Pressable
+                key={collection.id}
+                style={styles.collectionCard}
+                onPress={() => navigation.navigate('CollectionDetail', { title: collection.title })}
+              >
                 <ImageBackground
                   source={collection.image}
                   style={styles.collectionBg}
@@ -304,13 +317,15 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
       </ScrollView>
 
       <FloatingAskBar
-        text="Hỏi BanDoc nên học gì tiếp theo"
-        onPress={() => setAskModalVisible(true)}
+        placeholder="Hỏi Bạn Đọc nên học gì tiếp theo"
+        onOpenFullChat={() => openAskChat()}
+        onSubmitPrompt={(prompt) => openAskChat(prompt)}
       />
       <BottomNavBar activeTab="home" />
       <AskAIBottomSheet
         visible={askModalVisible}
         onClose={() => setAskModalVisible(false)}
+        onOpenFullChat={(prompt) => openAskChat(prompt)}
       />
     </SafeAreaView>
   );
@@ -322,7 +337,7 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.background,
   },
   header: {
-    paddingHorizontal: 20,
+    paddingHorizontal: uiSpacing.xl,
     paddingTop: 8,
     paddingBottom: 8,
     flexDirection: 'row',
@@ -337,7 +352,7 @@ const styles = StyleSheet.create({
   },
   headerTitle: {
     marginTop: 2,
-    fontSize: 24,
+    fontSize: uiTypography.h2,
     lineHeight: 30,
     color: COLORS.text,
     fontWeight: '800',
@@ -350,9 +365,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     backgroundColor: '#EEF0F7',
+    borderWidth: 1,
+    borderColor: '#E3E8EF',
   },
   scrollContent: {
-    paddingHorizontal: 20,
+    paddingHorizontal: uiSpacing.xl,
     paddingBottom: 150,
     gap: 16,
   },
@@ -376,6 +393,8 @@ const styles = StyleSheet.create({
     backgroundColor: '#6C5CE717',
     alignItems: 'center',
     justifyContent: 'center',
+    borderWidth: 1,
+    borderColor: '#E3E8EF',
   },
   discoveryTitle: {
     color: COLORS.text,
@@ -407,7 +426,7 @@ const styles = StyleSheet.create({
   },
   sectionTitle: {
     color: COLORS.text,
-    fontSize: 19,
+    fontSize: uiTypography.h3,
     fontWeight: '700',
     marginBottom: 8,
   },
@@ -422,11 +441,8 @@ const styles = StyleSheet.create({
     padding: 14,
     flexDirection: 'row',
     gap: 14,
-    shadowColor: '#191C1F',
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.08,
-    shadowRadius: 16,
-    elevation: 4,
+    borderWidth: 1,
+    borderColor: '#E3E8EF',
   },
   continueImage: {
     width: 95,
@@ -447,7 +463,7 @@ const styles = StyleSheet.create({
   continueTitle: {
     marginTop: 6,
     color: COLORS.text,
-    fontSize: 23,
+    fontSize: uiTypography.h2,
     fontWeight: '800',
   },
   continueAuthor: {
@@ -507,6 +523,8 @@ const styles = StyleSheet.create({
     padding: 12,
     flexDirection: 'row',
     gap: 12,
+    borderWidth: 1,
+    borderColor: '#E3E8EF',
   },
   recommendedImage: {
     width: 64,
@@ -544,13 +562,14 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: '#D8D5E4',
     borderRadius: 999,
-    paddingHorizontal: 20,
+    paddingHorizontal: uiSpacing.xl,
     paddingVertical: 10,
     backgroundColor: COLORS.surface,
   },
   topicChipActive: {
     backgroundColor: COLORS.primary,
     borderColor: COLORS.primary,
+    borderWidth: 1,
   },
   topicChipText: {
     color: COLORS.text,
@@ -591,7 +610,7 @@ const styles = StyleSheet.create({
   collectionTitle: {
     marginTop: 2,
     color: '#FFFFFF',
-    fontSize: 19,
+    fontSize: uiTypography.h3,
     fontWeight: '800',
   },
   summaryRow: {
@@ -601,6 +620,8 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     paddingVertical: 8,
     backgroundColor: '#FFFFFF',
+    borderWidth: 1,
+    borderColor: '#E3E8EF',
   },
   summaryIcon: {
     width: 40,

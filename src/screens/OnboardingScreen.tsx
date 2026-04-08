@@ -16,8 +16,9 @@ import { StackNavigationProp } from '@react-navigation/stack';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import { RootStackParamList } from '../navigation/AppNavigator';
+import { uiColors, uiSpacing } from '../theme/ui';
 
-const ONBOARDING_DONE_KEY = 'bandoc.onboarding.completed';
+const ONBOARDING_DONE_KEY = 'app.onboarding.completed';
 
 type OnboardingNavigationProp = StackNavigationProp<
   RootStackParamList,
@@ -267,7 +268,7 @@ export default function OnboardingScreen({ navigation }: OnboardingScreenProps) 
         {step === 1 ? (
           <Animated.View style={animatedStepStyle}>
             <View style={styles.titleWrap}>
-              <Text style={styles.title}>Điều gì đưa bạn đến với BanDoc?</Text>
+              <Text style={styles.title}>Điều gì đưa bạn đến với Bạn Đọc?</Text>
               <Text style={styles.subtitle}>
                 Giúp chúng tôi cá nhân hóa trải nghiệm theo mục tiêu đọc hiện tại của bạn.
               </Text>
@@ -428,7 +429,7 @@ const styles = StyleSheet.create({
   },
   header: {
     height: 64,
-    paddingHorizontal: 20,
+    paddingHorizontal: uiSpacing.xl,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
@@ -467,7 +468,7 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.primary,
   },
   scrollContent: {
-    paddingHorizontal: 20,
+    paddingHorizontal: uiSpacing.xl,
     paddingTop: 10,
     paddingBottom: 120,
   },
@@ -505,11 +506,6 @@ const styles = StyleSheet.create({
   goalCardSelected: {
     borderWidth: 2,
     borderColor: COLORS.primary,
-    shadowColor: '#1A1C1F',
-    shadowOffset: { width: 0, height: 8 },
-    shadowRadius: 18,
-    shadowOpacity: 0.12,
-    elevation: 4,
   },
   goalTitle: {
     color: COLORS.text,
@@ -546,17 +542,13 @@ const styles = StyleSheet.create({
     borderColor: COLORS.border,
     backgroundColor: COLORS.surface,
     borderRadius: 999,
-    paddingHorizontal: 16,
+    paddingHorizontal: uiSpacing.lg,
     paddingVertical: 10,
   },
   topicTagSelected: {
     borderColor: COLORS.primary,
     backgroundColor: COLORS.primary,
-    shadowColor: COLORS.primary,
-    shadowOffset: { width: 0, height: 4 },
-    shadowRadius: 12,
-    shadowOpacity: 0.26,
-    elevation: 3,
+    borderWidth: 1,
   },
   topicLabel: {
     color: COLORS.text,
@@ -583,11 +575,6 @@ const styles = StyleSheet.create({
     borderWidth: 2,
     borderColor: COLORS.primary,
     backgroundColor: COLORS.primary,
-    shadowColor: COLORS.primary,
-    shadowOffset: { width: 0, height: 8 },
-    shadowRadius: 18,
-    shadowOpacity: 0.2,
-    elevation: 4,
   },
   timeLeft: {
     flexDirection: 'row',
@@ -658,7 +645,7 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     bottom: 0,
-    paddingHorizontal: 20,
+    paddingHorizontal: uiSpacing.xl,
     paddingBottom: 16,
     paddingTop: 10,
     backgroundColor: '#F8F9FDE6',
@@ -671,11 +658,8 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.primary,
     alignItems: 'center',
     justifyContent: 'center',
-    shadowColor: COLORS.primary,
-    shadowOffset: { width: 0, height: 8 },
-    shadowRadius: 16,
-    shadowOpacity: 0.25,
-    elevation: 6,
+    borderWidth: 1,
+    borderColor: '#E3E8EF',
   },
   ctaButtonDisabled: {
     opacity: 0.45,

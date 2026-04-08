@@ -1,25 +1,61 @@
 import React from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { Pressable, StyleSheet, TextInput, View } from 'react-native';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
+import { uiColors, uiRadius, uiSizing, uiSpacing, uiTypography } from '../theme/ui';
 
 type FloatingAskBarProps = {
-  text?: string;
-  onPress?: () => void;
+  placeholder?: string;
+  onOpenFullChat?: () => void;
+  onSubmitPrompt?: (prompt: string) => void;
 };
 
 const COLORS = {
-  primary: '#6C5CE7',
-  mutedText: '#474554',
+  primary: uiColors.primary,
+  mutedText: uiColors.textMuted,
 };
 
-export default function FloatingAskBar({ text = 'Hỏi BanDoc nên học gì tiếp theo', onPress }: FloatingAskBarProps) {
+export default function FloatingAskBar({
+  placeholder = 'Hỏi Bạn Đọc về sách hoặc chủ đề...',
+  onOpenFullChat,
+  onSubmitPrompt,
+}: FloatingAskBarProps) {
+  const [prompt, setPrompt] = React.useState('');
+
+  const handleSubmit = React.useCallback(() => {
+    const trimmedPrompt = prompt.trim();
+
+    if (trimmedPrompt.length > 0) {
+      onSubmitPrompt?.(trimmedPrompt);
+      setPrompt('');
+      return;
+    }
+
+    onOpenFullChat?.();
+  }, [onOpenFullChat, onSubmitPrompt, prompt]);
+
   return (
     <View style={styles.askBarWrap}>
-      <Pressable style={styles.askBar} onPress={onPress}>
-        <MaterialIcons name="auto-awesome" size={20} color={COLORS.primary} />
-        <Text style={styles.askBarText}>{text}</Text>
-        <MaterialIcons name="arrow-forward" size={18} color="#787586" />
-      </Pressable>
+      <View style={styles.askBar}>
+        <Pressable style={styles.magicButton} onPress={onOpenFullChat}>
+          <MaterialIcons name="auto-awesome" size={18} color={COLORS.primary} />
+        </Pressable>
+        <TextInput
+          value={prompt}
+          onChangeText={setPrompt}
+          placeholder={placeholder}
+          placeholderTextColor="#9A97A9"
+          style={styles.askBarInput}
+          returnKeyType="send"
+          onSubmitEditing={handleSubmit}
+        />
+        <Pressable style={styles.sendButton} onPress={handleSubmit}>
+          <MaterialIcons
+            name={prompt.trim().length > 0 ? 'arrow-upward' : 'arrow-forward'}
+            size={18}
+            color={COLORS.primary}
+          />
+        </Pressable>
+      </View>
     </View>
   );
 }
@@ -29,29 +65,46 @@ const styles = StyleSheet.create({
     position: 'absolute',
     left: 0,
     right: 0,
-    bottom: 76,
-    paddingHorizontal: 20,
+    bottom: 80,
+    paddingHorizontal: uiSpacing.xl,
   },
   askBar: {
-    height: 50,
-    borderRadius: 14,
-    backgroundColor: '#FFFFFF',
+    height: uiSizing.floatingAskHeight,
+    borderRadius: uiRadius.lg,
+    backgroundColor: uiColors.surface,
     borderWidth: 1,
     borderColor: '#6C5CE712',
-    paddingHorizontal: 14,
+    paddingHorizontal: uiSpacing.sm,
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 10,
-    shadowColor: '#191C1F',
-    shadowOffset: { width: 0, height: 10 },
-    shadowOpacity: 0.12,
-    shadowRadius: 16,
-    elevation: 5,
+    gap: uiSpacing.sm,
   },
-  askBarText: {
+  magicButton: {
+    width: 34,
+    height: 34,
+    borderRadius: 99,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#F0EEFF',
+    borderWidth: 1,
+    borderColor: '#E3E8EF',
+  },
+  askBarInput: {
     flex: 1,
     color: COLORS.mutedText,
-    fontSize: 13,
+    fontSize: uiTypography.bodySm,
     fontWeight: '600',
+    paddingVertical: 0,
+    paddingHorizontal: 2,
+  },
+  sendButton: {
+    width: 34,
+    height: 34,
+    borderRadius: 99,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#E8E5FB',
+    borderWidth: 1,
+    borderColor: '#E3E8EF',
   },
 });

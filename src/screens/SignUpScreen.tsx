@@ -6,13 +6,14 @@ import {
   ScrollView,
   StyleSheet,
   Text,
-  TextInput,
   View,
 } from 'react-native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import FontAwesome5 from 'react-native-vector-icons/FontAwesome5';
 import { RootStackParamList } from '../navigation/AppNavigator';
+import AppTextInput from '../components/AppTextInput';
+import { uiColors, uiRadius, uiSizing, uiSpacing, uiTypography } from '../theme/ui';
 
 type SignUpNavigationProp = StackNavigationProp<RootStackParamList, 'SignUp'>;
 
@@ -21,13 +22,11 @@ type SignUpScreenProps = {
 };
 
 const COLORS = {
-  background: '#F8F9FD',
-  surface: '#FFFFFF',
-  primary: '#6C5CE7',
-  text: '#191C1F',
-  mutedText: '#474554',
-  border: '#C8C4D7',
-  softSurface: '#F2F3F7',
+  background: uiColors.background,
+  surface: uiColors.surface,
+  primary: uiColors.primary,
+  text: uiColors.text,
+  mutedText: uiColors.textMuted,
 };
 
 export default function SignUpScreen({ navigation }: SignUpScreenProps) {
@@ -35,8 +34,6 @@ export default function SignUpScreen({ navigation }: SignUpScreenProps) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
-  const [showPassword, setShowPassword] = useState(false);
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const onCreateAccount = () => {
     navigation.replace('Home');
@@ -51,90 +48,52 @@ export default function SignUpScreen({ navigation }: SignUpScreenProps) {
             <MaterialIcons name="auto-awesome" size={34} color="#FFFFFF" />
           </View>
           <Text style={styles.title}>Tạo tài khoản</Text>
-          <Text style={styles.subtitle}>Bắt đầu hành trình đọc thông minh cùng BanDoc</Text>
+          <Text style={styles.subtitle}>Bắt đầu hành trình đọc thông minh cùng Bạn Đọc</Text>
         </View>
 
         <View style={styles.card}>
           <View style={styles.fieldWrap}>
-            <Text style={styles.label}>Họ và tên</Text>
-            <View style={styles.inputWrap}>
-              <MaterialIcons name="person" size={20} color={COLORS.mutedText} style={styles.leftIcon} />
-              <TextInput
-                placeholder="Nguyễn Văn A"
-                placeholderTextColor="#787586"
-                value={fullName}
-                onChangeText={setFullName}
-                style={styles.input}
-              />
-            </View>
+            <AppTextInput
+              label="Họ và tên"
+              leftIcon="person"
+              placeholder="Nguyễn Văn A"
+              value={fullName}
+              onChangeText={setFullName}
+            />
           </View>
 
           <View style={styles.fieldWrap}>
-            <Text style={styles.label}>Địa chỉ email</Text>
-            <View style={styles.inputWrap}>
-              <MaterialIcons name="mail" size={20} color={COLORS.mutedText} style={styles.leftIcon} />
-              <TextInput
-                placeholder="hello@bandoc.vn"
-                placeholderTextColor="#787586"
-                value={email}
-                onChangeText={setEmail}
-                keyboardType="email-address"
-                autoCapitalize="none"
-                style={styles.input}
-              />
-            </View>
+            <AppTextInput
+              label="Địa chỉ email"
+              leftIcon="mail"
+              placeholder="hello@example.vn"
+              value={email}
+              onChangeText={setEmail}
+              keyboardType="email-address"
+              autoCapitalize="none"
+            />
           </View>
 
           <View style={styles.fieldWrap}>
-            <Text style={styles.label}>Mật khẩu</Text>
-            <View style={styles.inputWrap}>
-              <MaterialIcons name="lock" size={20} color={COLORS.mutedText} style={styles.leftIcon} />
-              <TextInput
-                placeholder="••••••••"
-                placeholderTextColor="#787586"
-                value={password}
-                onChangeText={setPassword}
-                secureTextEntry={!showPassword}
-                style={styles.input}
-              />
-              <Pressable onPress={() => setShowPassword((v) => !v)} style={styles.rightIconButton}>
-                <MaterialIcons
-                  name={showPassword ? 'visibility-off' : 'visibility'}
-                  size={20}
-                  color={COLORS.mutedText}
-                />
-              </Pressable>
-            </View>
+            <AppTextInput
+              label="Mật khẩu"
+              leftIcon="lock"
+              placeholder="••••••••"
+              value={password}
+              onChangeText={setPassword}
+              secureToggle
+            />
           </View>
 
           <View style={styles.fieldWrap}>
-            <Text style={styles.label}>Xác nhận mật khẩu</Text>
-            <View style={styles.inputWrap}>
-              <MaterialIcons
-                name="verified-user"
-                size={20}
-                color={COLORS.mutedText}
-                style={styles.leftIcon}
-              />
-              <TextInput
-                placeholder="••••••••"
-                placeholderTextColor="#787586"
-                value={confirmPassword}
-                onChangeText={setConfirmPassword}
-                secureTextEntry={!showConfirmPassword}
-                style={styles.input}
-              />
-              <Pressable
-                onPress={() => setShowConfirmPassword((v) => !v)}
-                style={styles.rightIconButton}
-              >
-                <MaterialIcons
-                  name={showConfirmPassword ? 'visibility-off' : 'visibility'}
-                  size={20}
-                  color={COLORS.mutedText}
-                />
-              </Pressable>
-            </View>
+            <AppTextInput
+              label="Xác nhận mật khẩu"
+              leftIcon="verified-user"
+              placeholder="••••••••"
+              value={confirmPassword}
+              onChangeText={setConfirmPassword}
+              secureToggle
+            />
           </View>
 
           <Pressable onPress={onCreateAccount} style={styles.signUpButton}>
@@ -177,7 +136,7 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.background,
   },
   content: {
-    paddingHorizontal: 22,
+    paddingHorizontal: uiSpacing.xl,
     paddingBottom: 28,
   },
   brandRow: {
@@ -202,11 +161,8 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.primary,
     alignItems: 'center',
     justifyContent: 'center',
-    shadowColor: '#6C5CE7',
-    shadowOffset: { width: 0, height: 10 },
-    shadowRadius: 20,
-    shadowOpacity: 0.26,
-    elevation: 8,
+    borderWidth: 1,
+    borderColor: '#E3E8EF',
   },
   title: {
     marginTop: 14,
@@ -217,72 +173,34 @@ const styles = StyleSheet.create({
   subtitle: {
     marginTop: 6,
     color: COLORS.mutedText,
+    fontSize: uiTypography.bodySm,
     fontWeight: '600',
   },
   card: {
     backgroundColor: COLORS.surface,
     borderRadius: 26,
-    padding: 20,
+    padding: uiSpacing.xl,
     borderWidth: 1,
     borderColor: '#C8C4D730',
-    shadowColor: '#191C1F',
-    shadowOffset: { width: 0, height: 8 },
-    shadowRadius: 24,
-    shadowOpacity: 0.08,
-    elevation: 5,
   },
   fieldWrap: {
     marginBottom: 12,
   },
-  label: {
-    marginBottom: 8,
-    marginLeft: 4,
-    fontSize: 11,
-    textTransform: 'uppercase',
-    letterSpacing: 1,
-    fontWeight: '700',
-    color: COLORS.mutedText,
-  },
-  inputWrap: {
-    height: 52,
-    borderRadius: 14,
-    backgroundColor: COLORS.softSurface,
-    justifyContent: 'center',
-  },
-  leftIcon: {
-    position: 'absolute',
-    left: 14,
-  },
-  rightIconButton: {
-    position: 'absolute',
-    right: 14,
-    padding: 2,
-  },
-  input: {
-    height: 52,
-    paddingLeft: 44,
-    paddingRight: 44,
-    color: COLORS.text,
-    fontWeight: '600',
-  },
   signUpButton: {
     marginTop: 8,
-    height: 50,
-    borderRadius: 16,
+    height: uiSizing.buttonHeight,
+    borderRadius: uiRadius.lg,
     backgroundColor: COLORS.primary,
     alignItems: 'center',
     justifyContent: 'center',
     flexDirection: 'row',
     gap: 8,
-    shadowColor: '#6C5CE7',
-    shadowOffset: { width: 0, height: 10 },
-    shadowRadius: 20,
-    shadowOpacity: 0.3,
-    elevation: 7,
+    borderWidth: 1,
+    borderColor: '#E3E8EF',
   },
   signUpButtonText: {
     color: '#FFFFFF',
-    fontSize: 16,
+    fontSize: uiTypography.body,
     fontWeight: '800',
   },
   socialDividerRow: {
@@ -297,8 +215,8 @@ const styles = StyleSheet.create({
     backgroundColor: '#C8C4D760',
   },
   dividerText: {
-    fontSize: 10,
-    color: '#787586',
+    fontSize: uiTypography.overline,
+    color: uiColors.textSubtle,
     textTransform: 'uppercase',
     fontWeight: '700',
     letterSpacing: 0.9,
@@ -310,7 +228,7 @@ const styles = StyleSheet.create({
   socialButton: {
     flex: 1,
     height: 46,
-    borderRadius: 14,
+    borderRadius: uiRadius.md,
     borderWidth: 1,
     borderColor: '#C8C4D780',
     alignItems: 'center',
@@ -325,6 +243,7 @@ const styles = StyleSheet.create({
   },
   socialText: {
     color: COLORS.text,
+    fontSize: uiTypography.bodySm,
     fontWeight: '700',
   },
   footerRow: {
@@ -336,10 +255,12 @@ const styles = StyleSheet.create({
   },
   footerText: {
     color: COLORS.mutedText,
+    fontSize: uiTypography.bodySm,
     fontWeight: '600',
   },
   footerLink: {
     color: COLORS.primary,
+    fontSize: uiTypography.bodySm,
     fontWeight: '800',
   },
 });

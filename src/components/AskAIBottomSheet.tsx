@@ -6,10 +6,12 @@ import {
   BottomSheetScrollView,
 } from '@gorhom/bottom-sheet';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
+import { uiColors, uiSpacing } from '../theme/ui';
 
 type AskAIBottomSheetProps = {
   visible: boolean;
   onClose: () => void;
+  onOpenFullChat: (prompt?: string) => void;
 };
 
 const QUICK_PROMPTS = [
@@ -18,9 +20,10 @@ const QUICK_PROMPTS = [
   'Giúp tôi học tâm lý học',
 ];
 
-export default function AskAIBottomSheet({ visible, onClose }: AskAIBottomSheetProps) {
+export default function AskAIBottomSheet({ visible, onClose, onOpenFullChat }: AskAIBottomSheetProps) {
   const bottomSheetRef = React.useRef<BottomSheetModal>(null);
   const snapPoints = React.useMemo(() => ['72%', '88%'], []);
+  const [prompt, setPrompt] = React.useState('');
 
   React.useEffect(() => {
     if (visible) {
@@ -52,6 +55,16 @@ export default function AskAIBottomSheet({ visible, onClose }: AskAIBottomSheetP
     [onClose]
   );
 
+  const handleOpenFullChat = React.useCallback(
+    (initialPrompt?: string) => {
+      const fallbackPrompt = prompt.trim();
+      onOpenFullChat(initialPrompt ?? (fallbackPrompt.length > 0 ? fallbackPrompt : undefined));
+      setPrompt('');
+      onClose();
+    },
+    [onClose, onOpenFullChat, prompt]
+  );
+
   return (
     <BottomSheetModal
       ref={bottomSheetRef}
@@ -66,7 +79,7 @@ export default function AskAIBottomSheet({ visible, onClose }: AskAIBottomSheetP
       <View style={styles.sheet}>
         <View style={styles.header}>
           <View>
-            <Text style={styles.title}>Hỏi Immersify</Text>
+            <Text style={styles.title}>Hỏi Bạn Đọc</Text>
             <Text style={styles.subtitle}>Trang chủ • Khám phá sách tiếp theo</Text>
           </View>
           <Pressable style={styles.closeBtn} onPress={onClose}>
@@ -79,9 +92,9 @@ export default function AskAIBottomSheet({ visible, onClose }: AskAIBottomSheetP
           contentContainerStyle={styles.content}
         >
           <View style={styles.quickPromptWrap}>
-            {QUICK_PROMPTS.map((prompt) => (
-              <Pressable key={prompt} style={styles.promptChip}>
-                <Text style={styles.promptChipText}>{prompt}</Text>
+            {QUICK_PROMPTS.map((quickPrompt) => (
+              <Pressable key={quickPrompt} style={styles.promptChip} onPress={() => handleOpenFullChat(quickPrompt)}>
+                <Text style={styles.promptChipText}>{quickPrompt}</Text>
               </Pressable>
             ))}
           </View>
@@ -101,7 +114,7 @@ export default function AskAIBottomSheet({ visible, onClose }: AskAIBottomSheetP
 
           <View style={styles.recommendHeader}>
             <Text style={styles.recommendTitle}>Gợi ý từ AI</Text>
-            <Pressable style={styles.openChatBtn}>
+            <Pressable style={styles.openChatBtn} onPress={() => handleOpenFullChat()}>
               <Text style={styles.openChatText}>Mở chat đầy đủ</Text>
               <MaterialIcons name="open-in-new" size={14} color="#6C5CE7" />
             </Pressable>
@@ -140,7 +153,7 @@ export default function AskAIBottomSheet({ visible, onClose }: AskAIBottomSheetP
           </Pressable>
 
           <View style={styles.openFullWrap}>
-            <Pressable style={styles.openFullBtn}>
+            <Pressable style={styles.openFullBtn} onPress={() => handleOpenFullChat()}>
               <MaterialIcons name="chat-bubble-outline" size={17} color="#474554" />
               <Text style={styles.openFullText}>Mở phiên chat đầy đủ</Text>
             </Pressable>
@@ -154,8 +167,12 @@ export default function AskAIBottomSheet({ visible, onClose }: AskAIBottomSheetP
               placeholder="Hỏi về sách hoặc chủ đề..."
               placeholderTextColor="#9A97A9"
               style={styles.input}
+              value={prompt}
+              onChangeText={setPrompt}
+              onSubmitEditing={() => handleOpenFullChat()}
+              returnKeyType="send"
             />
-            <Pressable style={styles.sendBtn}>
+            <Pressable style={styles.sendBtn} onPress={() => handleOpenFullChat()}>
               <MaterialIcons name="send" size={18} color="#6C5CE7" />
             </Pressable>
           </View>
@@ -167,13 +184,13 @@ export default function AskAIBottomSheet({ visible, onClose }: AskAIBottomSheetP
 
 const styles = StyleSheet.create({
   sheetBackground: {
-    backgroundColor: '#F7F8FC',
+    backgroundColor: uiColors.background,
     borderTopLeftRadius: 32,
     borderTopRightRadius: 32,
   },
   sheet: {
     flex: 1,
-    backgroundColor: '#F7F8FC',
+    backgroundColor: uiColors.background,
     overflow: 'hidden',
   },
   handle: {
@@ -183,7 +200,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#C8C4D7',
   },
   header: {
-    paddingHorizontal: 20,
+    paddingHorizontal: uiSpacing.xl,
     paddingTop: 14,
     paddingBottom: 12,
     flexDirection: 'row',
@@ -210,9 +227,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     backgroundColor: '#E9E8EF',
+    borderWidth: 1,
+    borderColor: '#E3E8EF',
   },
   content: {
-    paddingHorizontal: 20,
+    paddingHorizontal: uiSpacing.xl,
     paddingBottom: 112,
     gap: 12,
   },
@@ -301,6 +320,8 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     overflow: 'hidden',
     backgroundColor: '#E7E8EC',
+    borderWidth: 1,
+    borderColor: '#E3E8EF',
   },
   bookCover: {
     width: '100%',
@@ -351,6 +372,8 @@ const styles = StyleSheet.create({
     backgroundColor: '#E2F7EF',
     alignItems: 'center',
     justifyContent: 'center',
+    borderWidth: 1,
+    borderColor: '#E3E8EF',
   },
   topicArrowWrap: {
     paddingLeft: 8,
@@ -368,6 +391,8 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 7,
+    borderWidth: 1,
+    borderColor: '#E3E8EF',
   },
   openFullText: {
     color: '#474554',
@@ -385,6 +410,8 @@ const styles = StyleSheet.create({
     paddingHorizontal: 14,
     paddingTop: 10,
     paddingBottom: 16,
+    borderWidth: 1,
+    borderColor: '#E3E8EF',
   },
   inputInner: {
     height: 44,
@@ -394,6 +421,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingHorizontal: 10,
     gap: 8,
+    borderWidth: 1,
+    borderColor: '#E3E8EF',
   },
   input: {
     flex: 1,
@@ -409,5 +438,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     backgroundColor: '#E8E5FB',
+    borderWidth: 1,
+    borderColor: '#E3E8EF',
   },
 });
