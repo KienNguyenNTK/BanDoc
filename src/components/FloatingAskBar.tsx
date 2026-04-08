@@ -1,6 +1,7 @@
 import React from 'react';
 import { Pressable, StyleSheet, TextInput, View } from 'react-native';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { uiColors, uiRadius, uiSizing, uiSpacing, uiTypography } from '../theme/ui';
 
 type FloatingAskBarProps = {
@@ -20,6 +21,8 @@ export default function FloatingAskBar({
   onSubmitPrompt,
 }: FloatingAskBarProps) {
   const [prompt, setPrompt] = React.useState('');
+  const insets = useSafeAreaInsets();
+  const bottomOffset = uiSizing.bottomNavHeight + Math.max(insets.bottom, 6) + 8;
 
   const handleSubmit = React.useCallback(() => {
     const trimmedPrompt = prompt.trim();
@@ -34,7 +37,7 @@ export default function FloatingAskBar({
   }, [onOpenFullChat, onSubmitPrompt, prompt]);
 
   return (
-    <View style={styles.askBarWrap}>
+    <View style={[styles.askBarWrap, { bottom: bottomOffset }]}>
       <View style={styles.askBar}>
         <Pressable style={styles.magicButton} onPress={onOpenFullChat}>
           <MaterialIcons name="auto-awesome" size={18} color={COLORS.primary} />
@@ -65,7 +68,6 @@ const styles = StyleSheet.create({
     position: 'absolute',
     left: 0,
     right: 0,
-    bottom: 80,
     paddingHorizontal: uiSpacing.xl,
   },
   askBar: {

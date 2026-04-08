@@ -3,6 +3,7 @@ import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { RootStackParamList } from '../navigation/AppNavigator';
 import { uiColors, uiSizing, uiTypography } from '../theme/ui';
 
@@ -27,6 +28,8 @@ const ITEMS: Array<{ key: BottomTab; label: string; icon: string }> = [
 
 export default function BottomNavBar({ activeTab = 'home' }: BottomNavBarProps) {
   const navigation = useNavigation<StackNavigationProp<RootStackParamList>>();
+  const insets = useSafeAreaInsets();
+  const bottomInset = Math.max(insets.bottom, 6);
 
   const handlePress = (tab: BottomTab) => {
     if (tab === activeTab) {
@@ -59,7 +62,15 @@ export default function BottomNavBar({ activeTab = 'home' }: BottomNavBarProps) 
   };
 
   return (
-    <View style={styles.bottomNav}>
+    <View
+      style={[
+        styles.bottomNav,
+        {
+          height: uiSizing.bottomNavHeight + bottomInset,
+          paddingBottom: bottomInset,
+        },
+      ]}
+    >
       {ITEMS.map((item) => {
         const active = item.key === activeTab;
 
@@ -89,7 +100,6 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     bottom: 0,
-    height: uiSizing.bottomNavHeight,
     borderTopWidth: 1,
     borderTopColor: uiColors.borderSoft,
     backgroundColor: uiColors.surface,
