@@ -30,7 +30,7 @@ const SUGGESTED_PROMPTS = [
   'Nên học gì tiếp theo?',
 ];
 
-export default function AskAIScreen({ route, navigation }: AskAIScreenProps) {
+export default function AskAIScreen({ route }: AskAIScreenProps) {
   const userPrompt = route.params?.initialPrompt ?? 'Tôi muốn tìm hiểu thêm về kinh tế học hành vi. Có gợi ý nào không?';
   const [composerText, setComposerText] = React.useState('');
 
