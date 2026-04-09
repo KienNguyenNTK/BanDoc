@@ -41,6 +41,19 @@ export const uiTypography = {
   overline: 11,
 };
 
+export const uiFontFamily = {
+  system: 'System',
+  interRegular: 'Inter-Regular',
+  interMedium: 'Inter-Medium',
+  interSemiBold: 'Inter-SemiBold',
+  interBold: 'Inter-Bold',
+  loraRegular: 'Lora-Regular',
+  loraMedium: 'Lora-Medium',
+  loraSemiBold: 'Lora-SemiBold',
+  loraBold: 'Lora-Bold',
+  spaceMono: 'SpaceMono-Regular',
+};
+
 export const uiSizing = {
   inputHeight: 52,
   buttonHeight: 52,

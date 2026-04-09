@@ -75,7 +75,7 @@ export default function SearchScreen({ navigation }: SearchScreenProps) {
   );
 
   return (
-    <SafeAreaView style={styles.safeArea}>
+    <SafeAreaView edges={['top']} style={styles.safeArea}>
       <View style={styles.header}>
         <Text style={styles.headerTitle}>Tìm kiếm</Text>
         <Pressable style={styles.filterBtn}>
@@ -280,7 +280,6 @@ const styles = StyleSheet.create({
   },
   header: {
     paddingHorizontal: uiSpacing.lg,
-    paddingTop: 8,
     paddingBottom: 6,
     flexDirection: 'row',
     justifyContent: 'space-between',

@@ -117,7 +117,7 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
   };
 
   return (
-    <SafeAreaView style={styles.safeArea}>
+    <SafeAreaView edges={['top']} style={styles.safeArea}>
       <View style={styles.header}>
         <View>
           <Text style={styles.greeting}>Chào buổi tối, Alex</Text>
@@ -338,7 +338,6 @@ const styles = StyleSheet.create({
   },
   header: {
     paddingHorizontal: uiSpacing.xl,
-    paddingTop: 8,
     paddingBottom: 8,
     flexDirection: 'row',
     justifyContent: 'space-between',

@@ -8,12 +8,13 @@ import {
   TextInput,
   View,
 } from 'react-native';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { RouteProp } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import BottomNavBar from '../components/BottomNavBar';
 import { RootStackParamList } from '../navigation/AppNavigator';
-import { uiColors, uiSpacing } from '../theme/ui';
+import { uiColors, uiSizing, uiSpacing } from '../theme/ui';
 
 type AskAIScreenRouteProp = RouteProp<RootStackParamList, 'AskAI'>;
 type AskAIScreenNavigationProp = StackNavigationProp<RootStackParamList, 'AskAI'>;
@@ -33,6 +34,10 @@ const SUGGESTED_PROMPTS = [
 export default function AskAIScreen({ route }: AskAIScreenProps) {
   const userPrompt = route.params?.initialPrompt ?? 'Tôi muốn tìm hiểu thêm về kinh tế học hành vi. Có gợi ý nào không?';
   const [composerText, setComposerText] = React.useState('');
+  const insets = useSafeAreaInsets();
+  const bottomInset = Math.max(insets.bottom, 6);
+  const bottomNavOffset = uiSizing.bottomNavHeight + bottomInset;
+  const composerAreaHeight = 126;
 
   const handleSendComposer = React.useCallback(() => {
     setComposerText('');
@@ -41,7 +46,7 @@ export default function AskAIScreen({ route }: AskAIScreenProps) {
   const hasComposerText = composerText.trim().length > 0;
 
   return (
-    <View style={styles.screen}>
+    <SafeAreaView edges={['top']} style={styles.screen}>
       <View style={styles.header}>
         <View style={styles.headerLeft}>
           <Text style={styles.headerTitle}>Hỏi Bạn Đọc</Text>
@@ -53,7 +58,7 @@ export default function AskAIScreen({ route }: AskAIScreenProps) {
 
       <ScrollView
         style={styles.scroll}
-        contentContainerStyle={styles.scrollContent}
+        contentContainerStyle={[styles.scrollContent, { paddingBottom: composerAreaHeight + bottomNavOffset }]}
         showsVerticalScrollIndicator={false}
       >
         <View style={styles.contextWrap}>
@@ -109,7 +114,7 @@ export default function AskAIScreen({ route }: AskAIScreenProps) {
         </View>
       </ScrollView>
 
-      <View style={styles.bottomArea}>
+      <View style={[styles.bottomArea, { bottom: bottomNavOffset, paddingBottom: bottomInset + 4 }]}>
         <ScrollView
           horizontal
           showsHorizontalScrollIndicator={false}
@@ -142,7 +147,7 @@ export default function AskAIScreen({ route }: AskAIScreenProps) {
       </View>
 
       <BottomNavBar activeTab="ai" />
-    </View>
+    </SafeAreaView>
   );
 }
 
@@ -152,9 +157,8 @@ const styles = StyleSheet.create({
     backgroundColor: uiColors.background,
   },
   header: {
-    height: 60,
+    minHeight: 56,
     paddingHorizontal: uiSpacing.lg,
-    paddingTop: 8,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
@@ -182,7 +186,6 @@ const styles = StyleSheet.create({
   scrollContent: {
     paddingHorizontal: uiSpacing.xl,
     paddingTop: 8,
-    paddingBottom: 188,
     gap: 18,
   },
   contextWrap: {
@@ -315,7 +318,6 @@ const styles = StyleSheet.create({
     position: 'absolute',
     left: 0,
     right: 0,
-    bottom: 72,
     paddingTop: 10,
     backgroundColor: uiColors.background,
   },
@@ -339,7 +341,7 @@ const styles = StyleSheet.create({
   },
   composerWrap: {
     marginHorizontal: uiSpacing.xl,
-    marginBottom: 10,
+    marginBottom: 0,
     height: 52,
     borderRadius: 16,
     borderWidth: 1,

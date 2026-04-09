@@ -1,10 +1,13 @@
 import React from 'react';
 import {
   Image,
+  ImageSourcePropType,
+  LayoutChangeEvent,
   Pressable,
   ScrollView,
   StyleSheet,
   Text,
+  ViewStyle,
   View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -26,11 +29,92 @@ type BookDetailScreenProps = {
 };
 
 type BookTab = 'summary' | 'graph';
+type GraphPoint = { x: number; y: number };
+
+const CENTER_NODE_SIZE = 102;
+const LEFT_NODE_SIZE = 66;
+const RIGHT_NODE_SIZE = 62;
+const LOCATION_NODE_SIZE = 42;
+
+const pointOnCircle = (origin: GraphPoint, target: GraphPoint, radius: number): GraphPoint => {
+  const dx = target.x - origin.x;
+  const dy = target.y - origin.y;
+  const distance = Math.hypot(dx, dy);
+
+  if (distance === 0) {
+    return origin;
+  }
+
+  const ratio = radius / distance;
+
+  return {
+    x: origin.x + dx * ratio,
+    y: origin.y + dy * ratio,
+  };
+};
+
+const buildConnectorStyle = (
+  from: GraphPoint,
+  to: GraphPoint,
+  fromRadius: number,
+  toRadius: number
+): ViewStyle => {
+  const start = pointOnCircle(from, to, fromRadius);
+  const end = pointOnCircle(to, from, toRadius);
+  const dx = end.x - start.x;
+  const dy = end.y - start.y;
+  const length = Math.hypot(dx, dy);
+  const angle = Math.atan2(dy, dx);
+  const midX = (start.x + end.x) / 2;
+  const midY = (start.y + end.y) / 2;
+
+  return {
+    position: 'absolute',
+    left: midX - length / 2,
+    top: midY - 1,
+    width: length,
+    height: 2,
+    borderRadius: 99,
+    backgroundColor: '#BFC4D8',
+    transform: [{ rotateZ: `${angle}rad` }],
+    zIndex: 1,
+  };
+};
+
+const DEFAULT_BOOK_COVER = require('../assets/library/continue-reading.jpg');
+
+const BOOK_COVER_MAP: Array<{ keywords: string[]; source: ImageSourcePropType }> = [
+  {
+    keywords: ['sapiens'],
+    source: require('../assets/book-detail/sapiens-cover.jpg'),
+  },
+  {
+    keywords: ['thói quen nguyên tử', 'atomic habits'],
+    source: require('../assets/home/home-2.jpg'),
+  },
+  {
+    keywords: ['làm việc sâu', 'deep work'],
+    source: require('../assets/home/home-4.jpg'),
+  },
+];
 
 export default function BookDetailScreen({ route, navigation }: BookDetailScreenProps) {
   const [activeTab, setActiveTab] = React.useState<BookTab>('summary');
+  const [graphCanvasSize, setGraphCanvasSize] = React.useState<{ width: number; height: number }>({
+    width: 0,
+    height: 0,
+  });
   const title = route.params?.title ?? 'Sapiens: Lược sử loài người';
   const author = route.params?.author ?? 'Yuval Noah Harari';
+
+  const coverSource = React.useMemo<ImageSourcePropType>(() => {
+    const normalizedTitle = title.trim().toLowerCase();
+    const matched = BOOK_COVER_MAP.find((item) =>
+      item.keywords.some((keyword) => normalizedTitle.includes(keyword))
+    );
+
+    return matched?.source ?? DEFAULT_BOOK_COVER;
+  }, [title]);
 
   const openAskChat = React.useCallback(
     (initialPrompt?: string) => {
@@ -39,8 +123,66 @@ export default function BookDetailScreen({ route, navigation }: BookDetailScreen
     [navigation]
   );
 
+  const handleGraphCanvasLayout = React.useCallback((event: LayoutChangeEvent) => {
+    const { width, height } = event.nativeEvent.layout;
+
+    if (width <= 0 || height <= 0) {
+      return;
+    }
+
+    setGraphCanvasSize((prev) => {
+      if (prev.width === width && prev.height === height) {
+        return prev;
+      }
+
+      return { width, height };
+    });
+  }, []);
+
+  const graphPoints = React.useMemo(() => {
+    const { width, height } = graphCanvasSize;
+
+    return {
+      center: { x: width * 0.5, y: height * 0.54 },
+      left: { x: width * 0.31, y: height * 0.34 },
+      right: { x: width * 0.69, y: height * 0.36 },
+      time: { x: width * 0.5, y: height * 0.78 },
+    };
+  }, [graphCanvasSize]);
+
+  const graphConnectorStyles = React.useMemo(() => {
+    if (graphCanvasSize.width <= 0 || graphCanvasSize.height <= 0) {
+      return {
+        left: null,
+        right: null,
+        bottom: null,
+      };
+    }
+
+    return {
+      left: buildConnectorStyle(
+        graphPoints.left,
+        graphPoints.center,
+        LEFT_NODE_SIZE / 2,
+        CENTER_NODE_SIZE / 2
+      ),
+      right: buildConnectorStyle(
+        graphPoints.right,
+        graphPoints.center,
+        RIGHT_NODE_SIZE / 2,
+        CENTER_NODE_SIZE / 2
+      ),
+      bottom: buildConnectorStyle(
+        graphPoints.center,
+        graphPoints.time,
+        CENTER_NODE_SIZE / 2,
+        LOCATION_NODE_SIZE / 2
+      ),
+    };
+  }, [graphCanvasSize, graphPoints]);
+
   return (
-    <SafeAreaView style={styles.safeArea}>
+    <SafeAreaView edges={['top']} style={styles.safeArea}>
       <View style={styles.topBar}>
         <Pressable style={styles.iconBtn} onPress={() => navigation.goBack()}>
           <MaterialIcons name="arrow-back" size={22} color="#64748B" />
@@ -53,7 +195,9 @@ export default function BookDetailScreen({ route, navigation }: BookDetailScreen
 
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.content}>
         <View style={styles.headerSection}>
-          <Image source={require('../assets/book-detail/sapiens-cover.jpg')} style={styles.cover} />
+          <View style={styles.coverFrame}>
+            <Image source={coverSource} style={styles.cover} resizeMode="cover" />
+          </View>
           <Text style={styles.bookTitle}>{title}</Text>
           <Text style={styles.bookAuthor}>{author}</Text>
 
@@ -80,11 +224,6 @@ export default function BookDetailScreen({ route, navigation }: BookDetailScreen
             { key: 'graph', label: 'Sơ đồ' },
           ]}
         />
-
-        <Pressable style={styles.openTranslatorBtn} onPress={() => navigation.navigate('TranslatorChapters')}>
-          <MaterialIcons name="translate" size={18} color="#FFFFFF" />
-          <Text style={styles.openTranslatorText}>Tiếp tục đọc và dịch theo chương</Text>
-        </Pressable>
 
         {activeTab === 'summary' ? (
           <View style={styles.tabContent}>
@@ -151,35 +290,67 @@ export default function BookDetailScreen({ route, navigation }: BookDetailScreen
           <View style={styles.tabContent}>
             <Text style={styles.graphTitle}>Bản đồ quan hệ nhân vật</Text>
 
-            <View style={styles.bookGraphCanvas}>
-              <View style={[styles.mapLine, styles.mapLineOne]} />
-              <View style={[styles.mapLine, styles.mapLineTwo]} />
-              <View style={[styles.mapLine, styles.mapLineThree]} />
+            <View style={styles.bookGraphCanvas} onLayout={handleGraphCanvasLayout}>
+              {graphConnectorStyles.left ? <View style={graphConnectorStyles.left} /> : null}
+              {graphConnectorStyles.right ? <View style={graphConnectorStyles.right} /> : null}
+              {graphConnectorStyles.bottom ? <View style={graphConnectorStyles.bottom} /> : null}
 
-              <View style={styles.bookCenterNodeWrap}>
+              <View
+                style={[
+                  styles.bookCenterNodeWrap,
+                  {
+                    left: graphPoints.center.x - CENTER_NODE_SIZE / 2,
+                    top: graphPoints.center.y - CENTER_NODE_SIZE / 2,
+                  },
+                ]}
+              >
                 <View style={styles.bookCenterNodeOuter}>
-                  <Image source={require('../assets/translator/robert-main.jpg')} style={styles.bookCenterNodeImage} />
+                  <Image source={require('../assets/book-detail/sapiens-mini.jpg')} style={styles.bookCenterNodeImage} />
                 </View>
-                <Text style={styles.bookNodeName}>Robert Olmstead</Text>
+                <Text style={styles.bookNodeName}>Homo Sapiens</Text>
               </View>
 
-              <View style={styles.bookNodeLeftWrap}>
+              <View
+                style={[
+                  styles.bookNodeLeftWrap,
+                  {
+                    left: graphPoints.left.x - LEFT_NODE_SIZE / 2,
+                    top: graphPoints.left.y - LEFT_NODE_SIZE / 2,
+                  },
+                ]}
+              >
                 <View style={styles.bookSmallNodeGreen}>
-                  <Image source={require('../assets/translator/zadok.jpg')} style={styles.bookSmallNodeImage} />
+                  <MaterialIcons name="psychology" size={22} color="#006B55" />
                 </View>
-                <Text style={styles.bookNodeLabel}>Zadok Allen</Text>
+                <Text style={styles.bookNodeLabel}>Cách mạng nhận thức</Text>
               </View>
 
-              <View style={styles.bookNodeRightWrap}>
+              <View
+                style={[
+                  styles.bookNodeRightWrap,
+                  {
+                    left: graphPoints.right.x - RIGHT_NODE_SIZE / 2,
+                    top: graphPoints.right.y - RIGHT_NODE_SIZE / 2,
+                  },
+                ]}
+              >
                 <View style={styles.bookSmallNodePurple}>
-                  <Image source={require('../assets/translator/clerk.jpg')} style={styles.bookSmallNodeImage} />
+                  <MaterialIcons name="auto-awesome" size={22} color="#5341CD" />
                 </View>
-                <Text style={styles.bookNodeLabel}>Người bán hàng</Text>
+                <Text style={styles.bookNodeLabel}>Hư cấu tập thể</Text>
               </View>
 
-              <View style={styles.bookLocationWrap}>
+              <View
+                style={[
+                  styles.bookLocationWrap,
+                  {
+                    left: graphPoints.time.x - LOCATION_NODE_SIZE / 2,
+                    top: graphPoints.time.y - LOCATION_NODE_SIZE / 2,
+                  },
+                ]}
+              >
                 <View style={styles.bookLocationDot}><MaterialIcons name="location-on" size={16} color="#5D5B6E" /></View>
-                <Text style={styles.bookLocationLabel}>TRẠM XE INNSMOUTH</Text>
+                <Text style={styles.bookLocationLabel}>70.000 NĂM TRƯỚC</Text>
               </View>
 
               <View style={styles.canvasControls}>
@@ -191,22 +362,22 @@ export default function BookDetailScreen({ route, navigation }: BookDetailScreen
 
             <Text style={styles.bookSelectedTitle}>Nhân vật được chọn</Text>
             <View style={styles.bookEntityCard}>
-              <Image source={require('../assets/translator/robert-main.jpg')} style={styles.bookEntityImage} />
+              <Image source={require('../assets/book-detail/sapiens-mini.jpg')} style={styles.bookEntityImage} />
               <View style={styles.bookEntityHead}>
-                <Text style={styles.bookEntityName}>Robert Olmstead</Text>
-                <Text style={styles.bookEntityRole}>NHÂN VẬT CHÍNH</Text>
+                <Text style={styles.bookEntityName}>Homo Sapiens</Text>
+                <Text style={styles.bookEntityRole}>TRUNG TÂM</Text>
               </View>
               <Text style={styles.bookEntityDesc}>
-                Một học giả tò mò đi qua Massachusetts. Hành trình truy tìm gốc gác gia đình đã kéo anh vào mạng lưới bí ẩn và kinh hoàng tại Innsmouth.
+                Loài người có khả năng tạo và cùng tin vào các câu chuyện chung. Chính năng lực này giúp Sapiens hợp tác ở quy mô lớn và thay đổi lịch sử.
               </Text>
 
-              <View style={styles.bookRelationChip}><MaterialIcons name="link" size={14} color="#474554" /><Text style={styles.bookRelationText}>Người dẫn dắt: Zadok Allen</Text></View>
-              <View style={styles.bookRelationChip}><MaterialIcons name="warning" size={14} color="#474554" /><Text style={styles.bookRelationText}>Mối đe dọa: Deep Ones</Text></View>
-              <View style={styles.bookRelationChip}><MaterialIcons name="location-on" size={14} color="#474554" /><Text style={styles.bookRelationText}>Hiện tại: Newburyport</Text></View>
+              <View style={styles.bookRelationChip}><MaterialIcons name="link" size={14} color="#474554" /><Text style={styles.bookRelationText}>Nút liên quan: Cách mạng nhận thức</Text></View>
+              <View style={styles.bookRelationChip}><MaterialIcons name="auto-awesome" size={14} color="#474554" /><Text style={styles.bookRelationText}>Ý tưởng chính: Hư cấu tập thể</Text></View>
+              <View style={styles.bookRelationChip}><MaterialIcons name="schedule" size={14} color="#474554" /><Text style={styles.bookRelationText}>Mốc thời gian: 70.000 năm trước</Text></View>
 
               <Pressable style={styles.chatCharacterBtnBook} onPress={() => navigation.navigate('TranslatorCharacterChat')}>
                 <MaterialIcons name="chat" size={16} color="#FFFFFF" />
-                <Text style={styles.chatCharacterBtnBookText}>Trò chuyện với nhân vật</Text>
+                <Text style={styles.chatCharacterBtnBookText}>Khám phá ý tưởng liên quan</Text>
               </Pressable>
             </View>
           </View>
@@ -237,6 +408,13 @@ const styles = StyleSheet.create({
   topTitle: { fontSize: uiTypography.h2, color: uiColors.text, fontWeight: '600' },
   content: { paddingHorizontal: uiSpacing.lg, paddingBottom: 150, gap: uiSpacing.lg },
   headerSection: { alignItems: 'center', gap: 8 },
+  coverFrame: {
+    borderRadius: 18,
+    padding: 3,
+    backgroundColor: '#EDEEF2',
+    borderWidth: 1,
+    borderColor: '#E3E8EF',
+  },
   cover: { width: 126, height: 188, borderRadius: 16 },
   bookTitle: { marginTop: 6, textAlign: 'center', fontSize: uiTypography.h2, color: uiColors.text, fontWeight: '800' },
   bookAuthor: { fontSize: uiTypography.bodySm, color: uiColors.textMuted, fontWeight: '500' },
@@ -293,7 +471,7 @@ const styles = StyleSheet.create({
   utilityRow: { flexDirection: 'row', justifyContent: 'space-around', borderRadius: 16, backgroundColor: '#EDEEF2', paddingVertical: 10 },
   utilityItem: { padding: 6 },
   graphTitle: {
-    fontSize: 28,
+    fontSize: uiTypography.h2,
     color: '#191C1F',
     fontWeight: '700',
   },
@@ -311,7 +489,11 @@ const styles = StyleSheet.create({
     backgroundColor: '#FFFFFF',
     overflow: 'hidden',
   },
-  bookCenterNodeWrap: { position: 'absolute', left: '34%', top: '43%', alignItems: 'center' },
+  bookCenterNodeWrap: {
+    position: 'absolute',
+    alignItems: 'center',
+    zIndex: 3,
+  },
   bookCenterNodeOuter: {
     width: 102,
     height: 102,
@@ -323,20 +505,28 @@ const styles = StyleSheet.create({
   },
   bookCenterNodeImage: { width: '100%', height: '100%', borderRadius: 48, borderWidth: 2, borderColor: '#FFFFFF' },
   bookNodeName: {
-    marginTop: 6,
+    marginTop: 10,
     color: '#191C1F',
-    fontSize: 15,
+    fontSize: 12,
     fontWeight: '700',
     backgroundColor: '#FFFFFFE8',
     borderRadius: 999,
     borderWidth: 1,
     borderColor: '#E3E8EF',
-    paddingHorizontal: 10,
-    paddingVertical: 4,
+    paddingHorizontal: 8,
+    paddingVertical: 3,
     overflow: 'hidden',
   },
-  bookNodeLeftWrap: { position: 'absolute', left: '15%', top: '28%', alignItems: 'center' },
-  bookNodeRightWrap: { position: 'absolute', right: '16%', top: '34%', alignItems: 'center' },
+  bookNodeLeftWrap: {
+    position: 'absolute',
+    alignItems: 'center',
+    zIndex: 3,
+  },
+  bookNodeRightWrap: {
+    position: 'absolute',
+    alignItems: 'center',
+    zIndex: 3,
+  },
   bookSmallNodeGreen: {
     width: 66,
     height: 66,
@@ -359,7 +549,7 @@ const styles = StyleSheet.create({
   bookNodeLabel: {
     marginTop: 4,
     color: '#191C1F',
-    fontSize: 13,
+    fontSize: 11,
     fontWeight: '600',
     backgroundColor: '#FFFFFFE8',
     borderRadius: 999,
@@ -369,7 +559,11 @@ const styles = StyleSheet.create({
     paddingVertical: 3,
     overflow: 'hidden',
   },
-  bookLocationWrap: { position: 'absolute', left: '33%', bottom: '24%', alignItems: 'center' },
+  bookLocationWrap: {
+    position: 'absolute',
+    alignItems: 'center',
+    zIndex: 3,
+  },
   bookLocationDot: {
     width: 42,
     height: 42,
@@ -378,7 +572,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  bookLocationLabel: { marginTop: 6, color: '#787586', fontSize: 11, fontWeight: '700', letterSpacing: 1.1 },
+  bookLocationLabel: { marginTop: 4, color: '#787586', fontSize: 10, fontWeight: '700', letterSpacing: 0.7 },
   bookSelectedTitle: { color: '#191C1F', fontSize: 18, fontWeight: '700', paddingHorizontal: 2 },
   bookEntityCard: {
     borderRadius: 22,
@@ -390,7 +584,7 @@ const styles = StyleSheet.create({
   },
   bookEntityImage: { width: 96, height: 96, borderRadius: 16 },
   bookEntityHead: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
-  bookEntityName: { color: '#191C1F', fontSize: 22, fontWeight: '700', flex: 1, paddingRight: 8 },
+  bookEntityName: { color: '#191C1F', fontSize: 18, fontWeight: '700', flex: 1, paddingRight: 8 },
   bookEntityRole: {
     color: '#00725B',
     backgroundColor: '#6DFAD2',
@@ -402,7 +596,7 @@ const styles = StyleSheet.create({
     paddingVertical: 5,
     overflow: 'hidden',
   },
-  bookEntityDesc: { color: '#474554', fontSize: 16, lineHeight: 26 },
+  bookEntityDesc: { color: '#474554', fontSize: 14, lineHeight: 22 },
   bookRelationChip: {
     borderRadius: 12,
     backgroundColor: '#F2F3F7',
@@ -415,7 +609,7 @@ const styles = StyleSheet.create({
     gap: 6,
     alignSelf: 'flex-start',
   },
-  bookRelationText: { color: '#373849', fontSize: 14, fontWeight: '500' },
+  bookRelationText: { color: '#373849', fontSize: 13, fontWeight: '500' },
   chatCharacterBtnBook: {
     marginTop: 4,
     minHeight: 48,
@@ -436,35 +630,6 @@ const styles = StyleSheet.create({
     borderColor: '#E5E2F0',
     backgroundColor: '#FFFFFF',
     overflow: 'hidden',
-  },
-  mapLine: {
-    position: 'absolute',
-    height: 1,
-    backgroundColor: '#C8C4D7',
-  },
-  mapLineOne: {
-    width: 80,
-    left: 122,
-    top: 124,
-    transform: [{ rotate: '-140deg' }],
-  },
-  mapLineTwo: {
-    width: 82,
-    left: 170,
-    top: 138,
-    transform: [{ rotate: '-25deg' }],
-  },
-  mapLineThree: {
-    width: 76,
-    left: 164,
-    top: 184,
-    transform: [{ rotate: '45deg' }],
-  },
-  mapLineFour: {
-    width: 80,
-    left: 95,
-    top: 184,
-    transform: [{ rotate: '145deg' }],
   },
   centerNodeWrap: {
     position: 'absolute',

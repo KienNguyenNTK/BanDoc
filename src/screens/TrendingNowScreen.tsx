@@ -78,7 +78,7 @@ export default function TrendingNowScreen({ navigation }: TrendingNowScreenProps
   );
 
   return (
-    <SafeAreaView style={styles.safeArea}>
+    <SafeAreaView edges={['top']} style={styles.safeArea}>
       <View style={styles.header}>
         <View style={styles.headerLeft}>
           <Pressable style={styles.iconBtn} onPress={() => navigation.goBack()}>

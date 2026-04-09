@@ -18,7 +18,7 @@ export default function ProfileScreen({ navigation }: ProfileScreenProps) {
   const [notifications, setNotifications] = React.useState(true);
 
   return (
-    <SafeAreaView style={styles.safeArea}>
+    <SafeAreaView edges={['top']} style={styles.safeArea}>
       <View style={styles.header}>
         <View style={styles.headerLeft}>
           <Text style={styles.headerTitle}>Hồ sơ</Text>

@@ -67,7 +67,7 @@ export default function TopicDetailScreen({ route, navigation }: TopicDetailScre
   );
 
   return (
-    <SafeAreaView style={styles.safeArea}>
+    <SafeAreaView edges={['top']} style={styles.safeArea}>
       <View style={styles.topBar}>
         <View style={styles.topBarLeft}>
           <Pressable style={styles.topBtn} onPress={() => navigation.goBack()}>

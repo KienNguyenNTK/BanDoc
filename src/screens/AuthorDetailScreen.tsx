@@ -63,7 +63,7 @@ export default function AuthorDetailScreen({ route, navigation }: AuthorDetailSc
   );
 
   return (
-    <SafeAreaView style={styles.safeArea}>
+    <SafeAreaView edges={['top']} style={styles.safeArea}>
       <View style={styles.topBar}>
         <View style={styles.topLeft}>
           <Pressable style={styles.iconBtn} onPress={() => navigation.goBack()}>

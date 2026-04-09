@@ -87,7 +87,7 @@ export default function LibraryScreen({ navigation }: LibraryScreenProps) {
   );
 
   return (
-    <SafeAreaView style={styles.safeArea}>
+    <SafeAreaView edges={['top']} style={styles.safeArea}>
       <View style={styles.header}>
         <View style={styles.headerLeft}>
           <Text style={styles.headerTitle}>Thư viện của tôi</Text>
