@@ -11,11 +11,11 @@ import {
   UIManager,
   View,
 } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
 import { StackNavigationProp } from '@react-navigation/stack';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import { RootStackParamList } from '../navigation/AppNavigator';
+import { Screen } from '../components/ui';
 import { uiColors, uiSpacing } from '../theme/ui';
 
 const ONBOARDING_DONE_KEY = 'app.onboarding.completed';
@@ -50,45 +50,45 @@ type DailyTime = {
 };
 
 const COLORS = {
-  background: '#F8F9FD',
-  surface: '#FFFFFF',
-  primary: '#6C5CE7',
-  primaryDeep: '#5341CD',
-  text: '#191C1F',
-  mutedText: '#474554',
-  border: '#C8C4D7',
+  background: uiColors.background,
+  surface: uiColors.surface,
+  primary: uiColors.primary,
+  primaryDeep: uiColors.primaryDeep,
+  text: uiColors.text,
+  mutedText: uiColors.textMuted,
+  border: uiColors.border,
   softPrimary: '#6C5CE710',
 };
 
 const GOALS: Goal[] = [
   {
     id: 'skills',
-    title: 'Học kỹ năng mới',
-    description: 'Nâng cao năng lực qua lộ trình học tập có cấu trúc.',
+    title: 'Đọc nhanh ý chính',
+    description: 'Nắm phần quan trọng của sách trong vài phút.',
     icon: 'psychology',
   },
   {
     id: 'career',
-    title: 'Nâng cao kiến thức nghề nghiệp',
-    description: 'Luôn dẫn đầu lĩnh vực với những góc nhìn chuyên sâu.',
+    title: 'Nâng cấp tư duy nghề nghiệp',
+    description: 'Đọc tóm tắt chọn lọc, bám sát chủ đề bạn quan tâm.',
     icon: 'work',
   },
   {
     id: 'growth',
     title: 'Phát triển bản thân',
-    description: 'Nuôi dưỡng tư duy và xây dựng thói quen tích cực bền vững.',
+    description: 'Tích lũy ý tưởng hay và biến chúng thành thói quen.',
     icon: 'self-improvement',
   },
   {
     id: 'stories',
     title: 'Thư giãn với những câu chuyện hay',
-    description: 'Đắm mình vào thế giới hư cấu và các câu chuyện cuốn hút.',
+    description: 'Theo dõi cốt truyện nhanh bằng tóm tắt và sơ đồ quan hệ.',
     icon: 'auto-stories',
   },
   {
     id: 'news',
     title: 'Cập nhật thông tin',
-    description: 'Theo dõi sự kiện nổi bật qua bản tin được chọn lọc.',
+    description: 'Theo dõi ý chính theo dòng sự kiện được chọn lọc.',
     icon: 'newspaper',
   },
 ];
@@ -111,9 +111,9 @@ const TOPICS: Topic[] = [
 ];
 
 const DAILY_TIMES: DailyTime[] = [
-  { id: '10', title: '10 phút', hint: 'Học nhanh', icon: 'timer' },
+  { id: '10', title: '10 phút', hint: 'Đọc nhanh', icon: 'timer' },
   { id: '20', title: '20 phút', hint: 'Thói quen đều đặn', icon: 'schedule' },
-  { id: '30', title: '30 phút', hint: 'Học chuyên sâu', icon: 'auto-stories' },
+  { id: '30', title: '30 phút', hint: 'Đọc kỹ hơn', icon: 'auto-stories' },
   { id: '45', title: '45 phút', hint: 'Tập trung cao', icon: 'psychology' },
   { id: '60+', title: '1 giờ+', hint: 'Mức nâng cao', icon: 'all-inclusive' },
 ];
@@ -186,7 +186,9 @@ export default function OnboardingScreen({ navigation }: OnboardingScreenProps) 
       return;
     }
 
-    void completeOnboarding();
+    completeOnboarding().catch(() => {
+      navigation.replace('Login');
+    });
   };
 
   const goBack = () => {
@@ -196,11 +198,15 @@ export default function OnboardingScreen({ navigation }: OnboardingScreenProps) 
       return;
     }
 
-    void completeOnboarding();
+    completeOnboarding().catch(() => {
+      navigation.replace('Login');
+    });
   };
 
   const skipAll = () => {
-    void completeOnboarding();
+    completeOnboarding().catch(() => {
+      navigation.replace('Login');
+    });
   };
 
   const toggleTopic = (topicId: string) => {
@@ -237,7 +243,7 @@ export default function OnboardingScreen({ navigation }: OnboardingScreenProps) 
   };
 
   return (
-    <SafeAreaView style={styles.safeArea}>
+    <Screen mode="static" edges={['top']} contentStyle={styles.screenContent}>
       <View style={styles.header}>
         <Pressable onPress={goBack} hitSlop={10} style={styles.headerButton}>
           <Text style={styles.headerButtonText}>{step === 1 ? 'Đóng' : 'Quay lại'}</Text>
@@ -268,9 +274,9 @@ export default function OnboardingScreen({ navigation }: OnboardingScreenProps) 
         {step === 1 ? (
           <Animated.View style={animatedStepStyle}>
             <View style={styles.titleWrap}>
-              <Text style={styles.title}>Điều gì đưa bạn đến với Bạn Đọc?</Text>
+              <Text style={styles.title}>Bạn muốn đọc tóm tắt để làm gì?</Text>
               <Text style={styles.subtitle}>
-                Giúp chúng tôi cá nhân hóa trải nghiệm theo mục tiêu đọc hiện tại của bạn.
+                Chọn một mục để cá nhân hóa tóm tắt, ý chính và sơ đồ quan hệ.
               </Text>
             </View>
 
@@ -307,7 +313,7 @@ export default function OnboardingScreen({ navigation }: OnboardingScreenProps) 
             <View style={styles.titleWrap}>
               <Text style={styles.title}>Bạn quan tâm chủ đề nào?</Text>
               <Text style={styles.subtitle}>
-                Chọn ít nhất 3 chủ đề để cá nhân hóa nội dung đọc của bạn.
+                Chọn ít nhất 3 chủ đề để gợi ý tóm tắt phù hợp.
               </Text>
             </View>
 
@@ -344,8 +350,8 @@ export default function OnboardingScreen({ navigation }: OnboardingScreenProps) 
         {step === 3 ? (
           <Animated.View style={animatedStepStyle}>
             <View style={styles.titleWrap}>
-              <Text style={styles.title}>Mỗi ngày bạn dành bao lâu để học?</Text>
-              <Text style={styles.subtitle}>Chúng tôi sẽ tùy chỉnh nội dung theo lịch của bạn.</Text>
+              <Text style={styles.title}>Bạn thường đọc trong bao lâu?</Text>
+              <Text style={styles.subtitle}>Chúng tôi sẽ gợi ý tóm tắt theo nhịp của bạn.</Text>
             </View>
 
             <View style={styles.timeWrap}>
@@ -401,7 +407,7 @@ export default function OnboardingScreen({ navigation }: OnboardingScreenProps) 
                 style={styles.tipIcon}
               />
               <Text style={styles.tipText}>
-                Sự đều đặn là chìa khóa. Phần lớn người học hiệu quả bắt đầu với{' '}
+                Sự đều đặn là chìa khóa. Phần lớn người đọc bắt đầu với{' '}
                 <Text style={styles.tipHighlight}>20 phút</Text> mỗi ngày.
               </Text>
             </View>
@@ -418,14 +424,13 @@ export default function OnboardingScreen({ navigation }: OnboardingScreenProps) 
           <Text style={styles.ctaText}>{step === 3 ? 'Hoàn tất' : 'Tiếp tục'}</Text>
         </Pressable>
       </View>
-    </SafeAreaView>
+    </Screen>
   );
 }
 
 const styles = StyleSheet.create({
-  safeArea: {
-    flex: 1,
-    backgroundColor: COLORS.background,
+  screenContent: {
+    paddingHorizontal: 0,
   },
   header: {
     height: 64,

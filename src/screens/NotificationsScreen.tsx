@@ -1,10 +1,10 @@
 import React from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
 import { StackNavigationProp } from '@react-navigation/stack';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import { RootStackParamList } from '../navigation/AppNavigator';
-import { uiColors, uiSpacing } from '../theme/ui';
+import { Screen, TopBar } from '../components/ui';
+import { uiSpacing } from '../theme/ui';
 
 type NotificationsNavigationProp = StackNavigationProp<RootStackParamList, 'Notifications'>;
 
@@ -38,19 +38,19 @@ const FILTERS: Array<{ key: NotificationCategory; label: string }> = [
 const NOTIFICATIONS: NotificationItem[] = [
   {
     id: 'n-1',
-    title: 'Sách của bạn đã sẵn sàng',
-    message: 'World History Notes đã sẵn sàng để đọc, khám phá và nghe.',
+    title: 'Tóm tắt của bạn đã sẵn sàng',
+    message: 'World History Notes đã sẵn sàng để đọc tóm tắt, xem sơ đồ và hỏi đáp.',
     time: '2 phút trước',
     category: 'uploads',
     icon: 'cloud-done',
     iconBg: '#E4DFFF',
     iconColor: '#5341CD',
-    actionLabel: 'Mở sách',
+    actionLabel: 'Mở tóm tắt',
     actionType: 'soft',
   },
   {
     id: 'n-2',
-    title: 'Tóm tắt đã xong',
+    title: 'Tóm tắt đã sẵn sàng',
     message: 'Sơ đồ đang tiếp tục xử lý cho World History Notes.',
     time: 'Hôm nay',
     category: 'uploads',
@@ -61,14 +61,14 @@ const NOTIFICATIONS: NotificationItem[] = [
   },
   {
     id: 'n-3',
-    title: 'Gợi ý sách mới',
+    title: 'Gợi ý tóm tắt mới',
     message: 'Dựa trên sở thích tâm lý học, bạn có thể thích Tư duy nhanh và chậm.',
     time: 'Hôm qua',
     category: 'recommendations',
     icon: 'recommend',
     iconBg: '#FFDCC3',
     iconColor: '#884800',
-    actionLabel: 'Xem sách',
+    actionLabel: 'Xem tóm tắt',
     actionType: 'soft',
   },
   {
@@ -97,18 +97,16 @@ export default function NotificationsScreen({ navigation }: NotificationsScreenP
   }, [activeFilter]);
 
   return (
-    <SafeAreaView style={styles.safeArea}>
-      <View style={styles.header}>
-        <View style={styles.headerLeft}>
-          <Pressable style={styles.iconBtn} onPress={() => navigation.goBack()}>
-            <MaterialIcons name="arrow-back" size={24} color="#5E6274" />
+    <Screen mode="static" edges={['top']} contentStyle={styles.screenContent}>
+      <TopBar
+        title="Thông báo"
+        onBack={() => navigation.goBack()}
+        right={
+          <Pressable style={styles.iconBtn}>
+            <MaterialIcons name="filter-list" size={23} color="#5E6274" />
           </Pressable>
-          <Text style={styles.headerTitle}>Thông báo</Text>
-        </View>
-        <Pressable style={styles.iconBtn}>
-          <MaterialIcons name="filter-list" size={23} color="#5E6274" />
-        </Pressable>
-      </View>
+        }
+      />
 
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.content}>
         <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.filterRow}>
@@ -159,26 +157,13 @@ export default function NotificationsScreen({ navigation }: NotificationsScreenP
           ))}
         </View>
       </ScrollView>
-    </SafeAreaView>
+    </Screen>
   );
 }
 
 const styles = StyleSheet.create({
-  safeArea: {
-    flex: 1,
-    backgroundColor: uiColors.background,
-  },
-  header: {
-    height: 64,
-    paddingHorizontal: uiSpacing.lg,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-  },
-  headerLeft: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
+  screenContent: {
+    paddingHorizontal: 0,
   },
   iconBtn: {
     width: 34,
@@ -186,11 +171,6 @@ const styles = StyleSheet.create({
     borderRadius: 99,
     alignItems: 'center',
     justifyContent: 'center',
-  },
-  headerTitle: {
-    color: '#0E1328',
-    fontSize: 22,
-    fontWeight: '700',
   },
   content: {
     paddingHorizontal: uiSpacing.lg,

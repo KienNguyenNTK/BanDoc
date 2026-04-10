@@ -17,7 +17,7 @@ type AskAIBottomSheetProps = {
 const QUICK_PROMPTS = [
   'Tôi nên đọc gì tiếp theo?',
   'Gợi ý tóm tắt trong 10 phút',
-  'Giúp tôi học tâm lý học',
+  'Gợi ý tóm tắt về tâm lý học',
 ];
 
 export default function AskAIBottomSheet({ visible, onClose, onOpenFullChat }: AskAIBottomSheetProps) {
@@ -105,7 +105,7 @@ export default function AskAIBottomSheet({ visible, onClose, onOpenFullChat }: A
               <View style={styles.assistantContent}>
                 <Text style={styles.assistantLabel}>Trợ lý</Text>
                 <Text style={styles.assistantText}>
-                  Dựa trên lịch sử đọc gần đây, bạn có thể hợp với sách tâm lý học ứng dụng và năng suất.
+                  Dựa trên lịch sử đọc gần đây, bạn có thể hợp với tóm tắt về tâm lý học ứng dụng và năng suất.
                   Mình gợi ý bắt đầu bằng một bản tóm tắt ngắn và một bộ sưu tập phù hợp.
                 </Text>
               </View>
@@ -126,11 +126,11 @@ export default function AskAIBottomSheet({ visible, onClose, onOpenFullChat }: A
             </View>
             <View style={styles.resultContent}>
               <View style={styles.resultTopRow}>
-                <Text style={styles.resultBadge}>Sách</Text>
+                <Text style={styles.resultBadge}>Tóm tắt</Text>
                 <MaterialIcons name="bookmark-border" size={16} color="#B2AFC1" />
               </View>
               <Text style={styles.resultName}>Thinking, Fast and Slow</Text>
-              <Text style={styles.resultMeta}>Daniel Kahneman • 15 phút đọc</Text>
+              <Text style={styles.resultMeta}>Daniel Kahneman • 15 phút tóm tắt</Text>
               <View style={styles.exploreRow}>
                 <Text style={styles.exploreText}>Xem bản tóm tắt</Text>
                 <MaterialIcons name="chevron-right" size={16} color="#6C5CE7" />

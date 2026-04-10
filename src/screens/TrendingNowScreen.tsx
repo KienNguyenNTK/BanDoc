@@ -7,13 +7,14 @@ import {
   Text,
   View,
 } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
 import { StackNavigationProp } from '@react-navigation/stack';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import BottomNavBar from '../components/BottomNavBar';
 import FloatingAskBar from '../components/FloatingAskBar';
+import { Screen, TopBar } from '../components/ui';
 import { RootStackParamList } from '../navigation/AppNavigator';
-import { uiColors, uiSpacing, uiTypography } from '../theme/ui';
+import { uiSpacing, uiTypography } from '../theme/ui';
+import { buildChatContext, listCategories, listSummaries, resolveSummaryCoverSource } from '../data';
 
 type TrendingNowNavigationProp = StackNavigationProp<RootStackParamList, 'TrendingNow'>;
 
@@ -21,76 +22,40 @@ type TrendingNowScreenProps = {
   navigation: TrendingNowNavigationProp;
 };
 
-type TrendingBook = {
-  id: string;
-  title: string;
-  author: string;
-  rating: string;
-  summary: string;
-  image: number;
+const ratingLabelForSummary = (summaryId: string) => {
+  if (summaryId === 'sapiens') return '4.8';
+  if (summaryId === 'deep-work') return '4.7';
+  if (summaryId === 'innsmouth') return '4.9';
+  return '4.8';
 };
-
-const FILTERS = ['Tất cả', 'Tâm lý học', 'Kinh doanh', 'Lịch sử', 'Công nghệ'];
-
-const BOOKS: TrendingBook[] = [
-  {
-    id: 'tr-1',
-    title: 'Thói quen nguyên tử',
-    author: 'James Clear',
-    rating: '4.8',
-    summary: '12 phút tóm tắt',
-    image: require('../assets/trending/trending-1.jpg'),
-  },
-  {
-    id: 'tr-2',
-    title: 'Nhà giả kim',
-    author: 'Paulo Coelho',
-    rating: '4.9',
-    summary: '10 phút tóm tắt',
-    image: require('../assets/trending/trending-2.jpg'),
-  },
-  {
-    id: 'tr-3',
-    title: 'Làm việc sâu',
-    author: 'Cal Newport',
-    rating: '4.7',
-    summary: '15 phút tóm tắt',
-    image: require('../assets/trending/trending-3.jpg'),
-  },
-  {
-    id: 'tr-4',
-    title: 'Sapiens',
-    author: 'Yuval Noah Harari',
-    rating: '4.8',
-    summary: '18 phút tóm tắt',
-    image: require('../assets/trending/trending-4.jpg'),
-  },
-];
 
 export default function TrendingNowScreen({ navigation }: TrendingNowScreenProps) {
   const [activeFilter, setActiveFilter] = React.useState('Tất cả');
+  const filters = React.useMemo(() => ['Tất cả', ...listCategories().slice(0, 8)], []);
+  const allSummaries = React.useMemo(() => listSummaries(), []);
+  const list = React.useMemo(() => {
+    if (activeFilter === 'Tất cả') return allSummaries;
+    return allSummaries.filter((s) => (s.categories ?? []).some((c) => c.toLowerCase() === activeFilter.toLowerCase()));
+  }, [activeFilter, allSummaries]);
 
   const openAskChat = React.useCallback(
     (initialPrompt?: string) => {
-      navigation.navigate('AskAI', { initialPrompt });
+      const context = buildChatContext({
+        source: 'home',
+        extraText: `Ngữ cảnh: Xu hướng hiện tại. Bộ lọc: "${activeFilter}".`,
+      });
+      navigation.navigate('AskAI', { initialPrompt, context });
     },
-    [navigation]
+    [activeFilter, navigation]
   );
 
   return (
-    <SafeAreaView edges={['top']} style={styles.safeArea}>
-      <View style={styles.header}>
-        <View style={styles.headerLeft}>
-          <Pressable style={styles.iconBtn} onPress={() => navigation.goBack()}>
-            <MaterialIcons name="arrow-back" size={22} color="#6C5CE7" />
-          </Pressable>
-          <Text style={styles.headerTitle}>Xu hướng hiện tại</Text>
-        </View>
-      </View>
+    <Screen mode="static" edges={['top']} contentStyle={styles.screenContent}>
+      <TopBar title="Xu hướng hiện tại" onBack={() => navigation.goBack()} tone="primary" />
 
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.content}>
         <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.filterRow}>
-          {FILTERS.map((filter) => {
+          {filters.map((filter) => {
             const active = filter === activeFilter;
 
             return (
@@ -106,30 +71,33 @@ export default function TrendingNowScreen({ navigation }: TrendingNowScreenProps
         </ScrollView>
 
         <View style={styles.listWrap}>
-          {BOOKS.map((book) => (
+          {list.map((summary) => (
             <Pressable
-              key={book.id}
+              key={summary.id}
               style={styles.bookCard}
-              onPress={() => navigation.navigate('BookDetail', { title: book.title, author: book.author })}
+              onPress={() => navigation.navigate('BookDetail', { summaryId: summary.id })}
             >
-              <Image source={book.image} style={styles.bookImage} />
+              <Image
+                source={resolveSummaryCoverSource(summary.id) ?? require('../assets/library/continue-reading.jpg')}
+                style={styles.bookImage}
+              />
               <View style={styles.bookRight}>
                 <View>
                   <View style={styles.titleRow}>
-                    <Text style={styles.bookTitle}>{book.title}</Text>
+                    <Text style={styles.bookTitle}>{summary.title}</Text>
                     <MaterialIcons name="bookmark-border" size={21} color="#787586" />
                   </View>
-                  <Text style={styles.bookAuthor}>{book.author}</Text>
+                  {summary.author ? <Text style={styles.bookAuthor}>{summary.author}</Text> : null}
                 </View>
 
                 <View style={styles.metaRow}>
                   <View style={styles.metaBadge}>
                     <MaterialIcons name="star" size={15} color="#AC5D00" />
-                    <Text style={styles.metaBadgeText}>{book.rating}</Text>
+                    <Text style={styles.metaBadgeText}>{ratingLabelForSummary(summary.id)}</Text>
                   </View>
                   <View style={styles.summaryRow}>
                     <MaterialIcons name="schedule" size={16} color="#474554" />
-                    <Text style={styles.summaryText}>{book.summary}</Text>
+                    <Text style={styles.summaryText}>{`${summary.durationMinutes ?? 12} phút tóm tắt`}</Text>
                   </View>
                 </View>
               </View>
@@ -139,41 +107,18 @@ export default function TrendingNowScreen({ navigation }: TrendingNowScreenProps
       </ScrollView>
 
       <FloatingAskBar
-        placeholder="Hỏi Bạn Đọc nên học gì tiếp theo"
+        placeholder="Hỏi Bạn Đọc nên đọc gì tiếp theo"
         onOpenFullChat={() => openAskChat()}
         onSubmitPrompt={(prompt) => openAskChat(prompt)}
       />
       <BottomNavBar activeTab="home" />
-    </SafeAreaView>
+    </Screen>
   );
 }
 
 const styles = StyleSheet.create({
-  safeArea: {
-    flex: 1,
-    backgroundColor: uiColors.background,
-  },
-  header: {
-    height: 58,
-    paddingHorizontal: uiSpacing.lg,
-    justifyContent: 'center',
-  },
-  headerLeft: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 10,
-  },
-  iconBtn: {
-    width: 34,
-    height: 34,
-    borderRadius: 99,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  headerTitle: {
-    fontSize: uiTypography.h2,
-    color: '#191C1F',
-    fontWeight: '700',
+  screenContent: {
+    paddingHorizontal: 0,
   },
   content: {
     paddingHorizontal: uiSpacing.lg,

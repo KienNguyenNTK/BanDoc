@@ -7,12 +7,12 @@ import {
   Text,
   View,
 } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
 import { StackNavigationProp } from '@react-navigation/stack';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import FontAwesome5 from 'react-native-vector-icons/FontAwesome5';
 import { RootStackParamList } from '../navigation/AppNavigator';
 import AppTextInput from '../components/AppTextInput';
+import { Screen } from '../components/ui';
 import { uiColors, uiRadius, uiSizing, uiSpacing, uiTypography } from '../theme/ui';
 
 type LoginNavigationProp = StackNavigationProp<RootStackParamList, 'Login'>;
@@ -38,7 +38,7 @@ export default function LoginScreen({ navigation }: LoginScreenProps) {
   };
 
   return (
-    <SafeAreaView style={styles.safeArea}>
+    <Screen mode="static" edges={['top']} contentStyle={styles.screenContent}>
       <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
         <View style={styles.heroWrap}>
           <View style={styles.blurGlow} />
@@ -46,7 +46,7 @@ export default function LoginScreen({ navigation }: LoginScreenProps) {
             <MaterialIcons name="auto-awesome" size={34} color={COLORS.primary} />
           </View>
           <Text style={styles.brand}>Bạn Đọc</Text>
-          <Text style={styles.tagline}>Biến sách thành tri thức dễ ứng dụng</Text>
+          <Text style={styles.tagline}>Tóm tắt • Sơ đồ • Hỏi đáp theo ngữ cảnh</Text>
         </View>
 
         <View style={styles.card}>
@@ -107,14 +107,13 @@ export default function LoginScreen({ navigation }: LoginScreenProps) {
           </Pressable>
         </View>
       </ScrollView>
-    </SafeAreaView>
+    </Screen>
   );
 }
 
 const styles = StyleSheet.create({
-  safeArea: {
-    flex: 1,
-    backgroundColor: COLORS.background,
+  screenContent: {
+    paddingHorizontal: 0,
   },
   content: {
     paddingHorizontal: uiSpacing.xl,

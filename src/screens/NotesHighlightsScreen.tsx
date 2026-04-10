@@ -1,11 +1,12 @@
 import React from 'react';
 import { Image, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
 import { StackNavigationProp } from '@react-navigation/stack';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import { RootStackParamList } from '../navigation/AppNavigator';
 import SegmentedTabs from '../components/SegmentedTabs';
+import { Screen, TopBar } from '../components/ui';
 import { uiColors, uiRadius, uiSpacing, uiTypography } from '../theme/ui';
+import { getInsight, getSummaryById, listNotesForHighlights, resolveNoteCoverSource } from '../data';
 
 type NotesHighlightsNavigationProp = StackNavigationProp<RootStackParamList, 'NotesHighlights'>;
 
@@ -14,58 +15,6 @@ type NotesHighlightsScreenProps = {
 };
 
 type FilterTab = 'all' | 'highlight' | 'note' | 'quote';
-type ItemType = 'highlight' | 'note' | 'quote';
-
-type NoteItem = {
-  id: string;
-  type: ItemType;
-  timeLabel: string;
-  bookTitle: string;
-  excerpt: string;
-  title?: string;
-  author: string;
-  cover: any;
-};
-
-const ITEMS: NoteItem[] = [
-  {
-    id: '1',
-    type: 'highlight',
-    timeLabel: '2 giờ trước',
-    bookTitle: 'Sapiens - Cách mạng nhận thức',
-    excerpt: 'Lịch sử là thứ chỉ một số rất ít người thực sự tạo ra, trong khi số đông còn lại vẫn đang cày ruộng và gánh nước.',
-    author: 'Yuval Noah Harari',
-    cover: require('../assets/notes/sapiens-cover.jpg'),
-  },
-  {
-    id: '2',
-    type: 'note',
-    timeLabel: '5 giờ trước',
-    title: 'Hệ thống quan trọng hơn mục tiêu',
-    bookTitle: 'Thói quen nguyên tử - Nền tảng',
-    excerpt: 'Mục tiêu thật sự không phải vạch đích, mà là danh tính của người có thể liên tục chạm tới nó. Tập trung vào 1% tiến bộ mỗi ngày.',
-    author: 'James Clear',
-    cover: require('../assets/notes/atomic-habits-cover.jpg'),
-  },
-  {
-    id: '3',
-    type: 'quote',
-    timeLabel: 'Hôm qua',
-    bookTitle: 'Suy tưởng - Marcus Aurelius',
-    excerpt: 'Hạnh phúc của bạn phụ thuộc vào chất lượng suy nghĩ của chính bạn.',
-    author: 'Marcus Aurelius',
-    cover: require('../assets/notes/meditations-cover.jpg'),
-  },
-  {
-    id: '4',
-    type: 'highlight',
-    timeLabel: '12 Th01',
-    bookTitle: 'Làm việc sâu - Quy tắc thành công',
-    excerpt: 'Rời khỏi đám đông mất tập trung để trở thành số ít tập trung là một trải nghiệm mang tính chuyển đổi.',
-    author: 'Cal Newport',
-    cover: require('../assets/notes/deep-work-cover.jpg'),
-  },
-];
 
 const TAB_LABELS: Array<{ key: FilterTab; label: string }> = [
   { key: 'all', label: 'Tất cả' },
@@ -76,29 +25,28 @@ const TAB_LABELS: Array<{ key: FilterTab; label: string }> = [
 
 export default function NotesHighlightsScreen({ navigation }: NotesHighlightsScreenProps) {
   const [activeTab, setActiveTab] = React.useState<FilterTab>('all');
+  const items = React.useMemo(() => listNotesForHighlights(), []);
 
   const filteredItems = React.useMemo(() => {
     if (activeTab === 'all') {
-      return ITEMS;
+      return items;
     }
 
-    return ITEMS.filter((item) => item.type === activeTab);
-  }, [activeTab]);
+    return items.filter((item) => item.type === activeTab);
+  }, [activeTab, items]);
 
   return (
-    <SafeAreaView style={styles.safeArea}>
-      <View style={styles.header}>
-        <View style={styles.headerLeft}>
-          <Pressable style={styles.iconBtn} onPress={() => navigation.goBack()}>
-            <MaterialIcons name="arrow-back" size={24} color="#5341CD" />
+    <Screen mode="static" edges={['top']} contentStyle={styles.screenContent}>
+      <TopBar
+        title="Ghi chú và đánh dấu"
+        onBack={() => navigation.goBack()}
+        tone="primary"
+        right={
+          <Pressable style={styles.iconBtn}>
+            <MaterialIcons name="more-vert" size={22} color="#667085" />
           </Pressable>
-          <Text style={styles.headerTitle}>Ghi chú và đánh dấu</Text>
-        </View>
-
-        <Pressable style={styles.iconBtn}>
-          <MaterialIcons name="more-vert" size={22} color="#667085" />
-        </Pressable>
-      </View>
+        }
+      />
 
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.content}>
         <SegmentedTabs value={activeTab} options={TAB_LABELS} onChange={setActiveTab} />
@@ -106,12 +54,17 @@ export default function NotesHighlightsScreen({ navigation }: NotesHighlightsScr
         <View style={styles.feedList}>
           {filteredItems.map((item) => {
             const typeColor = item.type === 'highlight' ? '#5341CD' : item.type === 'note' ? '#AC5D00' : '#006B55';
+            const summary = getSummaryById(item.summaryId);
+            const insight = summary && item.insightId ? getInsight(summary, item.insightId) : undefined;
+            const bookTitle = summary?.title ?? 'Tóm tắt';
+            const insightLine = insight ? `Ý chính ${String(insight.index).padStart(2, '0')}: ${insight.title}` : '';
+            const coverSource = resolveNoteCoverSource(item) ?? require('../assets/library/continue-reading.jpg');
 
             return (
               <View key={item.id} style={styles.card}>
                 <View style={styles.cardTopMeta}>
                   <View style={styles.metaLeft}>
-                    <Image source={item.cover} style={styles.cover} />
+                    <Image source={coverSource} style={styles.cover} />
                     <View>
                       <Text style={[styles.typeLabel, { color: typeColor }]}>{item.type.toUpperCase()}</Text>
                       <Text style={styles.timeLabel}>{item.timeLabel}</Text>
@@ -134,29 +87,33 @@ export default function NotesHighlightsScreen({ navigation }: NotesHighlightsScr
 
                 <View style={styles.bookInfoWrap}>
                   <MaterialIcons name="menu-book" size={16} color="#5F6071" />
-                  <Text style={styles.bookInfoText}>{item.bookTitle}</Text>
+                  <Text style={styles.bookInfoText}>{bookTitle}</Text>
                 </View>
+                {insightLine ? <Text style={styles.insightLine} numberOfLines={1}>{insightLine}</Text> : null}
 
                 <View style={styles.actionRow}>
                   <Pressable
                     style={styles.secondaryBtn}
-                    onPress={() => navigation.navigate('BookDetail', { title: item.bookTitle, author: item.author })}
+                    onPress={() =>
+                      navigation.navigate('BookDetail', {
+                        summaryId: item.summaryId,
+                      })
+                    }
                   >
-                    <Text style={styles.secondaryBtnText}>Mở sách</Text>
+                    <Text style={styles.secondaryBtnText}>Mở tóm tắt</Text>
                   </Pressable>
 
                   <Pressable
                     style={styles.secondaryBtn}
                     onPress={() =>
                       navigation.navigate('InsightDetail', {
-                        bookTitle: item.bookTitle,
-                        author: item.author,
                         personalNote: item.excerpt,
-                        insightTitle: item.title ?? 'Trích đoạn đã lưu',
+                        summaryId: item.summaryId,
+                        insightId: item.insightId,
                       })
                     }
                   >
-                    <Text style={styles.secondaryBtnText}>Insight liên quan</Text>
+                    <Text style={styles.secondaryBtnText}>Ý chính liên quan</Text>
                   </Pressable>
                 </View>
               </View>
@@ -168,27 +125,13 @@ export default function NotesHighlightsScreen({ navigation }: NotesHighlightsScr
       <Pressable style={styles.fab}>
         <MaterialIcons name="add" size={30} color="#FFFFFF" />
       </Pressable>
-    </SafeAreaView>
+    </Screen>
   );
 }
 
 const styles = StyleSheet.create({
-  safeArea: {
-    flex: 1,
-    backgroundColor: uiColors.background,
-  },
-  header: {
-    height: 60,
-    paddingHorizontal: uiSpacing.lg,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-  },
-  headerLeft: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-    flex: 1,
+  screenContent: {
+    paddingHorizontal: 0,
   },
   iconBtn: {
     width: 34,
@@ -196,11 +139,6 @@ const styles = StyleSheet.create({
     borderRadius: 99,
     alignItems: 'center',
     justifyContent: 'center',
-  },
-  headerTitle: {
-    color: uiColors.text,
-    fontSize: uiTypography.h3,
-    fontWeight: '700',
   },
   content: {
     paddingHorizontal: uiSpacing.lg,
@@ -293,6 +231,12 @@ const styles = StyleSheet.create({
     fontSize: 15,
     fontWeight: '600',
     flex: 1,
+  },
+  insightLine: {
+    marginTop: 6,
+    color: '#787586',
+    fontSize: 12,
+    fontWeight: '600',
   },
   actionRow: {
     marginTop: 12,

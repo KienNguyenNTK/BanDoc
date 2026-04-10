@@ -15,6 +15,8 @@ import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import BottomNavBar from '../components/BottomNavBar';
 import { RootStackParamList } from '../navigation/AppNavigator';
 import { uiColors, uiSizing, uiSpacing } from '../theme/ui';
+import { listSummaries, resolveSummaryCoverSource } from '../data';
+import type { ChatContext } from '../types/content';
 
 type AskAIScreenRouteProp = RouteProp<RootStackParamList, 'AskAI'>;
 type AskAIScreenNavigationProp = StackNavigationProp<RootStackParamList, 'AskAI'>;
@@ -28,11 +30,12 @@ const SUGGESTED_PROMPTS = [
   'Xem thêm nội dung giống vậy',
   'Có bộ sưu tập nào cho chủ đề này?',
   'Gợi ý tóm tắt trong 15 phút',
-  'Nên học gì tiếp theo?',
+  'Nên đọc gì tiếp theo?',
 ];
 
-export default function AskAIScreen({ route }: AskAIScreenProps) {
-  const userPrompt = route.params?.initialPrompt ?? 'Tôi muốn tìm hiểu thêm về kinh tế học hành vi. Có gợi ý nào không?';
+export default function AskAIScreen({ route, navigation }: AskAIScreenProps) {
+  const userPrompt = route.params?.initialPrompt ?? 'Tôi muốn hiểu thêm về kinh tế học hành vi. Có gợi ý nào không?';
+  const context: ChatContext | undefined = route.params?.context;
   const [composerText, setComposerText] = React.useState('');
   const insets = useSafeAreaInsets();
   const bottomInset = Math.max(insets.bottom, 6);
@@ -44,6 +47,7 @@ export default function AskAIScreen({ route }: AskAIScreenProps) {
   }, []);
 
   const hasComposerText = composerText.trim().length > 0;
+  const recs = React.useMemo(() => listSummaries().slice(0, 2), []);
 
   return (
     <SafeAreaView edges={['top']} style={styles.screen}>
@@ -62,10 +66,24 @@ export default function AskAIScreen({ route }: AskAIScreenProps) {
         showsVerticalScrollIndicator={false}
       >
         <View style={styles.contextWrap}>
-          <Text style={styles.contextTitle}>Khám phá sách, chủ đề và lộ trình học</Text>
+          <Text style={styles.contextTitle}>Hỏi mọi thứ về tóm tắt và sơ đồ</Text>
           <View style={styles.contextChip}>
-            <MaterialIcons name="home" size={13} color="#4029BA" />
-            <Text style={styles.contextChipText}>Ngữ cảnh trang chủ</Text>
+            <MaterialIcons
+              name={context?.source === 'summary' || context?.source === 'graph' ? 'menu-book' : context?.source === 'library' ? 'local-library' : 'home'}
+              size={13}
+              color="#4029BA"
+            />
+            <Text style={styles.contextChipText}>
+              {context?.source === 'summary'
+                ? 'Ngữ cảnh tóm tắt'
+                : context?.source === 'graph'
+                  ? 'Ngữ cảnh sơ đồ'
+                  : context?.source === 'library'
+                    ? 'Ngữ cảnh thư viện'
+                    : context?.source === 'explore'
+                      ? 'Ngữ cảnh khám phá'
+                      : 'Ngữ cảnh trang chủ'}
+            </Text>
           </View>
         </View>
 
@@ -82,39 +100,31 @@ export default function AskAIScreen({ route }: AskAIScreenProps) {
             </View>
             <View style={styles.assistantBubble}>
               <Text style={styles.assistantText}>
-                Dựa trên mối quan tâm của bạn về kinh tế học hành vi, mình gợi ý một số bản tóm tắt
-                nổi bật giúp hiểu rõ cách con người ra quyết định và những thiên kiến thường gặp.
+                {context?.contextText
+                  ? `Mình đang bám theo ngữ cảnh bạn chọn. Dưới đây là trả lời dựa trên thông tin hiện có (mock).\n\n${context.contextText.slice(0, 280)}${context.contextText.length > 280 ? '…' : ''}`
+                  : 'Bạn có thể hỏi mọi thứ về tóm tắt, ý chính, nhân vật/khái niệm trong sơ đồ, hoặc xin gợi ý đọc tiếp.'}
               </Text>
             </View>
           </View>
 
           <View style={styles.cardsWrap}>
-            <Pressable style={styles.bookCard}>
-              <Image source={require('../assets/home/home-2.jpg')} style={styles.bookCover} />
+            {recs.map((s) => (
+            <Pressable key={s.id} style={styles.bookCard} onPress={() => navigation.navigate('BookDetail', { summaryId: s.id })}>
+              <Image source={resolveSummaryCoverSource(s.id) ?? require('../assets/library/continue-reading.jpg')} style={styles.bookCover} />
               <View style={styles.bookMeta}>
-                <Text style={styles.bookTitle}>Tư duy nhanh và chậm</Text>
-                <Text style={styles.bookAuthor}>Daniel Kahneman</Text>
+                <Text style={styles.bookTitle}>{s.title}</Text>
+                {s.author ? <Text style={styles.bookAuthor}>{s.author}</Text> : null}
                 <View style={styles.openBookBtn}>
-                  <Text style={styles.openBookText}>Mở sách</Text>
+                    <Text style={styles.openBookText}>Mở tóm tắt</Text>
                 </View>
               </View>
             </Pressable>
-
-            <Pressable style={styles.bookCard}>
-              <Image source={require('../assets/home/home-3.jpg')} style={styles.bookCover} />
-              <View style={styles.bookMeta}>
-                <Text style={styles.bookTitle}>Hành vi lệch chuẩn</Text>
-                <Text style={styles.bookAuthor}>Richard Thaler</Text>
-                <View style={styles.openBookBtn}>
-                  <Text style={styles.openBookText}>Mở sách</Text>
-                </View>
-              </View>
-            </Pressable>
+            ))}
           </View>
         </View>
       </ScrollView>
 
-      <View style={[styles.bottomArea, { bottom: bottomNavOffset, paddingBottom: bottomInset + 4 }]}>
+      <View style={[styles.bottomArea, { bottom: bottomNavOffset, paddingBottom: uiSpacing.sm }]}>
         <ScrollView
           horizontal
           showsHorizontalScrollIndicator={false}
@@ -134,7 +144,7 @@ export default function AskAIScreen({ route }: AskAIScreenProps) {
           <TextInput
             value={composerText}
             onChangeText={setComposerText}
-            placeholder="Hỏi Bạn Đọc mọi thứ về sách, chủ đề..."
+            placeholder="Hỏi Bạn Đọc về tóm tắt, ý chính, sơ đồ, nhân vật..."
             placeholderTextColor="#9A97A9"
             style={styles.composerInput}
             returnKeyType="send"

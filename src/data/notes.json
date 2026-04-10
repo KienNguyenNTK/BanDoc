@@ -1,0 +1,57 @@
+[
+  {
+    "id": "nh-1",
+    "type": "highlight",
+    "timeLabel": "2 giờ trước",
+    "summaryId": "sapiens",
+    "insightId": "sapiens-i1",
+    "excerpt": "Lịch sử là thứ chỉ một số rất ít người thực sự tạo ra, trong khi số đông còn lại vẫn đang cày ruộng và gánh nước.",
+    "coverKey": "notes.sapiens-cover"
+  },
+  {
+    "id": "nh-2",
+    "type": "note",
+    "timeLabel": "5 giờ trước",
+    "summaryId": "deep-work",
+    "insightId": "deep-work-i2",
+    "title": "Hệ thống quan trọng hơn mục tiêu",
+    "excerpt": "Mục tiêu thật sự không phải vạch đích, mà là danh tính của người có thể liên tục chạm tới nó. Tập trung vào 1% tiến bộ mỗi ngày.",
+    "coverKey": "notes.atomic-habits-cover"
+  },
+  {
+    "id": "nh-3",
+    "type": "quote",
+    "timeLabel": "Hôm qua",
+    "summaryId": "innsmouth",
+    "insightId": "innsmouth-k2",
+    "excerpt": "Hạnh phúc của bạn phụ thuộc vào chất lượng suy nghĩ của chính bạn.",
+    "coverKey": "notes.meditations-cover"
+  },
+  {
+    "id": "nh-4",
+    "type": "highlight",
+    "timeLabel": "12 Th01",
+    "summaryId": "deep-work",
+    "insightId": "deep-work-i1",
+    "excerpt": "Rời khỏi đám đông mất tập trung để trở thành số ít tập trung là một trải nghiệm mang tính chuyển đổi.",
+    "coverKey": "notes.deep-work-cover"
+  },
+  {
+    "id": "lib-1",
+    "type": "quote",
+    "timeLabel": "Hôm nay",
+    "summaryId": "sapiens",
+    "insightId": "sapiens-i1",
+    "excerpt": "\"Điều giúp Homo Sapiens thống trị thế giới là khả năng tin vào những câu chuyện chung...\"",
+    "thumbKey": "library.note-sapiens"
+  },
+  {
+    "id": "lib-2",
+    "type": "highlight",
+    "timeLabel": "Hôm nay",
+    "summaryId": "deep-work",
+    "insightId": "deep-work-i1",
+    "excerpt": "\"Làm việc sâu là khả năng tập trung không xao nhãng vào nhiệm vụ nhận thức khó.\"",
+    "thumbKey": "library.note-deep-work"
+  }
+]

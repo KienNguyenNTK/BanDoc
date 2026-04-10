@@ -1,10 +1,10 @@
 import React from 'react';
 import { Pressable, ScrollView, StyleSheet, Switch, Text, View } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
 import { StackNavigationProp } from '@react-navigation/stack';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import { RootStackParamList } from '../navigation/AppNavigator';
-import { uiColors, uiSpacing } from '../theme/ui';
+import { Screen, TopBar } from '../components/ui';
+import { uiSpacing } from '../theme/ui';
 
 type SettingsNavigationProp = StackNavigationProp<RootStackParamList, 'Settings'>;
 
@@ -19,18 +19,17 @@ export default function SettingsScreen({ navigation }: SettingsScreenProps) {
   const [wifiOnly, setWifiOnly] = React.useState(true);
 
   return (
-    <SafeAreaView style={styles.safeArea}>
-      <View style={styles.header}>
-        <View style={styles.headerLeft}>
-          <Pressable style={styles.iconBtn} onPress={() => navigation.goBack()}>
-            <MaterialIcons name="arrow-back" size={24} color="#6C5CE7" />
+    <Screen mode="static" edges={['top']} contentStyle={styles.screenContent}>
+      <TopBar
+        title="Cài đặt"
+        onBack={() => navigation.goBack()}
+        tone="primary"
+        right={
+          <Pressable style={styles.iconBtn}>
+            <MaterialIcons name="help-outline" size={24} color="#6C5CE7" />
           </Pressable>
-          <Text style={styles.headerTitle}>Cài đặt</Text>
-        </View>
-        <Pressable style={styles.iconBtn}>
-          <MaterialIcons name="help-outline" size={24} color="#6C5CE7" />
-        </Pressable>
-      </View>
+        }
+      />
 
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.content}>
         <View style={styles.section}>
@@ -204,26 +203,13 @@ export default function SettingsScreen({ navigation }: SettingsScreenProps) {
           <Text style={styles.versionText}>Phiên bản 2.4.1 (Build 890)</Text>
         </View>
       </ScrollView>
-    </SafeAreaView>
+    </Screen>
   );
 }
 
 const styles = StyleSheet.create({
-  safeArea: {
-    flex: 1,
-    backgroundColor: uiColors.background,
-  },
-  header: {
-    height: 60,
-    paddingHorizontal: uiSpacing.lg,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-  },
-  headerLeft: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
+  screenContent: {
+    paddingHorizontal: 0,
   },
   iconBtn: {
     width: 34,
@@ -231,11 +217,6 @@ const styles = StyleSheet.create({
     borderRadius: 99,
     alignItems: 'center',
     justifyContent: 'center',
-  },
-  headerTitle: {
-    color: '#191C1F',
-    fontSize: 18,
-    fontWeight: '700',
   },
   content: {
     paddingHorizontal: uiSpacing.lg,

@@ -8,6 +8,7 @@ type FloatingAskBarProps = {
   placeholder?: string;
   onOpenFullChat?: () => void;
   onSubmitPrompt?: (prompt: string) => void;
+  bottomOffset?: number;
 };
 
 const COLORS = {
@@ -19,10 +20,13 @@ export default function FloatingAskBar({
   placeholder = 'Hỏi Bạn Đọc về sách hoặc chủ đề...',
   onOpenFullChat,
   onSubmitPrompt,
+  bottomOffset,
 }: FloatingAskBarProps) {
   const [prompt, setPrompt] = React.useState('');
   const insets = useSafeAreaInsets();
-  const bottomOffset = uiSizing.bottomNavHeight + Math.max(insets.bottom, 6) + 8;
+  const bottomInset = Math.max(insets.bottom, 6);
+  const resolvedBottomOffset =
+    bottomOffset ?? uiSizing.bottomNavHeight + bottomInset + uiSpacing.xs;
 
   const handleSubmit = React.useCallback(() => {
     const trimmedPrompt = prompt.trim();
@@ -37,7 +41,7 @@ export default function FloatingAskBar({
   }, [onOpenFullChat, onSubmitPrompt, prompt]);
 
   return (
-    <View style={[styles.askBarWrap, { bottom: bottomOffset }]}>
+    <View style={[styles.askBarWrap, { bottom: resolvedBottomOffset }]}>
       <View style={styles.askBar}>
         <Pressable style={styles.magicButton} onPress={onOpenFullChat}>
           <MaterialIcons name="auto-awesome" size={18} color={COLORS.primary} />

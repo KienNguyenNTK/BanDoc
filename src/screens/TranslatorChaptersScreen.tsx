@@ -1,10 +1,10 @@
 import React from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
 import { StackNavigationProp } from '@react-navigation/stack';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import { RootStackParamList } from '../navigation/AppNavigator';
-import { uiColors, uiSpacing } from '../theme/ui';
+import { Screen, TopBar } from '../components/ui';
+import { uiSpacing } from '../theme/ui';
 
 type TranslatorChaptersNavigationProp = StackNavigationProp<RootStackParamList, 'TranslatorChapters'>;
 
@@ -18,19 +18,16 @@ export default function TranslatorChaptersScreen({ navigation }: TranslatorChapt
   const [activeFilter, setActiveFilter] = React.useState<ChapterFilter>('all');
 
   return (
-    <SafeAreaView style={styles.safeArea}>
-      <View style={styles.header}>
-        <View style={styles.headerLeft}>
-          <Pressable style={styles.iconBtn} onPress={() => navigation.goBack()}>
-            <MaterialIcons name="arrow-back" size={22} color="#64748B" />
+    <Screen mode="static" edges={['top']} contentStyle={styles.screenContent}>
+      <TopBar
+        title="Các chương"
+        onBack={() => navigation.goBack()}
+        right={
+          <Pressable style={styles.iconBtn}>
+            <MaterialIcons name="more-vert" size={21} color="#64748B" />
           </Pressable>
-          <Text style={styles.headerTitle}>Các chương</Text>
-        </View>
-        <Pressable style={styles.iconBtn}>
-          <MaterialIcons name="more-vert" size={21} color="#64748B" />
-        </Pressable>
-      </View>
-
+        }
+      />
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.content}>
         <View style={styles.projectContext}>
           <Text style={styles.projectSubtitle}>PHỤ ĐỀ DỰ ÁN</Text>
@@ -133,22 +130,13 @@ export default function TranslatorChaptersScreen({ navigation }: TranslatorChapt
           </View>
         </View>
       </ScrollView>
-    </SafeAreaView>
+    </Screen>
   );
 }
 
 const styles = StyleSheet.create({
-  safeArea: { flex: 1, backgroundColor: uiColors.background },
-  header: {
-    height: 60,
-    paddingHorizontal: uiSpacing.lg,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-  },
-  headerLeft: { flexDirection: 'row', alignItems: 'center', gap: 8 },
+  screenContent: { paddingHorizontal: 0 },
   iconBtn: { width: 34, height: 34, borderRadius: 99, alignItems: 'center', justifyContent: 'center' },
-  headerTitle: { color: '#191C1F', fontSize: 18, fontWeight: '700' },
   content: { paddingHorizontal: uiSpacing.lg, paddingTop: 8, paddingBottom: 24, gap: 14 },
   projectContext: { gap: 2 },
   projectSubtitle: { color: '#5341CD', fontSize: 11, fontWeight: '700', letterSpacing: 1.5 },

@@ -1,11 +1,12 @@
 import React from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View, Image } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { RouteProp } from '@react-navigation/native';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import { RootStackParamList } from '../navigation/AppNavigator';
-import { uiColors, uiSpacing } from '../theme/ui';
+import { Screen, TopBar } from '../components/ui';
+import { buildChatContext, getInsight, getSummaryById } from '../data';
+import { uiSpacing } from '../theme/ui';
 
 type InsightDetailNavigationProp = StackNavigationProp<RootStackParamList, 'InsightDetail'>;
 type InsightDetailRouteProp = RouteProp<RootStackParamList, 'InsightDetail'>;
@@ -16,37 +17,49 @@ type InsightDetailScreenProps = {
 };
 
 export default function InsightDetailScreen({ navigation, route }: InsightDetailScreenProps) {
-  const {
-    bookTitle = 'Sapiens',
-    author = 'Yuval Noah Harari',
-    genre = 'Phi hư cấu',
-    quote = '"What allowed Sapiens to dominate the world was the ability to create and believe in shared fictions."',
-    insightTitle = 'Insight 01 - Cuộc cách mạng nhận thức',
-    savedOn = 'Lưu ngày 12 tháng 10, 2023',
-    personalNote =
-      "Điều này giải thích vì sao sự hợp tác quy mô lớn của con người là có thể. Doanh nghiệp, quốc gia và tôn giáo đều là các 'huyền thoại chung' giúp hàng triệu người xa lạ có thể phối hợp hiệu quả.",
-  } = route.params || {};
+  const params = route.params ?? {};
+  const summaryId = params.summaryId;
+  const insightId = params.insightId;
+
+  const summary = React.useMemo(() => (summaryId ? getSummaryById(summaryId) : undefined), [summaryId]);
+  const insight = React.useMemo(() => (summary && insightId ? getInsight(summary, insightId) : undefined), [insightId, summary]);
+
+  const bookTitle = summary?.title ?? params.bookTitle ?? 'Tóm tắt';
+  const author = summary?.author ?? params.author ?? '';
+  const genre = params.genre ?? (summary?.categories?.[0] ? summary.categories[0] : 'Tóm tắt');
+  const quote = params.quote ?? (insight?.quote ? `"${insight.quote}"` : '');
+  const insightTitle =
+    params.insightTitle ?? (insight ? `Ý chính ${String(insight.index).padStart(2, '0')} - ${insight.title}` : 'Ý chính');
+  const savedOn = params.savedOn ?? 'Đã lưu';
+  const personalNote = params.personalNote ?? '';
+
+  const resolvedSummaryId = summary?.id ?? summaryId;
+
+  const coverSource = React.useMemo(() => {
+    if (resolvedSummaryId === 'sapiens') return require('../assets/notes/sapiens-cover.jpg');
+    if (resolvedSummaryId === 'deep-work') return require('../assets/notes/deep-work-cover.jpg');
+    if (resolvedSummaryId === 'innsmouth') return require('../assets/translator/project-cover.jpg');
+    return require('../assets/insight/insight-book-cover.jpg');
+  }, [resolvedSummaryId]);
 
   return (
-    <SafeAreaView style={styles.safeArea}>
-      <View style={styles.header}>
-        <View style={styles.headerLeft}>
-          <Pressable style={styles.iconBtn} onPress={() => navigation.goBack()}>
-            <MaterialIcons name="arrow-back" size={24} color="#5D6A80" />
+    <Screen mode="static" edges={['top']} contentStyle={styles.screenContent}>
+      <TopBar
+        title="Ý chính"
+        onBack={() => navigation.goBack()}
+        right={
+          <Pressable style={styles.iconBtn}>
+            <MaterialIcons name="share" size={22} color="#5D6A80" />
           </Pressable>
-          <Text style={styles.headerTitle}>Chi tiết ghi chú</Text>
-        </View>
-        <Pressable style={styles.iconBtn}>
-          <MaterialIcons name="share" size={22} color="#5D6A80" />
-        </Pressable>
-      </View>
+        }
+      />
 
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.content}>
         <View style={styles.bookInfoCard}>
-          <Image source={require('../assets/insight/insight-book-cover.jpg')} style={styles.bookCover} />
+          <Image source={coverSource} style={styles.bookCover} />
           <View style={styles.bookMeta}>
             <Text style={styles.bookTitle}>{bookTitle}</Text>
-            <Text style={styles.bookAuthor}>{author}</Text>
+            {author ? <Text style={styles.bookAuthor}>{author}</Text> : null}
             <View style={styles.genreRow}>
               <MaterialIcons name="menu-book" size={15} color="#5341CD" />
               <Text style={styles.genreText}>{genre}</Text>
@@ -56,59 +69,68 @@ export default function InsightDetailScreen({ navigation, route }: InsightDetail
 
         <View style={styles.quoteCard}>
           <MaterialIcons name="format-quote" size={38} color="#C5C0EE" />
-          <Text style={styles.quoteText}>{quote}</Text>
+          {quote ? <Text style={styles.quoteText}>{quote}</Text> : <Text style={styles.quoteText}>—</Text>}
           <View style={styles.metaDivider} />
           <Text style={styles.insightTitle}>{insightTitle}</Text>
           <Text style={styles.savedOnText}>{savedOn}</Text>
         </View>
 
-        <View style={styles.noteSectionHeader}>
-          <Text style={styles.noteSectionTitle}>GHI CHÚ CÁ NHÂN</Text>
-          <Pressable style={styles.editBtn}>
-            <MaterialIcons name="edit" size={15} color="#5341CD" />
-            <Text style={styles.editText}>Sửa</Text>
-          </Pressable>
-        </View>
+        {personalNote ? (
+          <>
+            <View style={styles.noteSectionHeader}>
+              <Text style={styles.noteSectionTitle}>GHI CHÚ CÁ NHÂN</Text>
+              <Pressable style={styles.editBtn}>
+                <MaterialIcons name="edit" size={15} color="#5341CD" />
+                <Text style={styles.editText}>Sửa</Text>
+              </Pressable>
+            </View>
 
-        <View style={styles.noteCard}>
-          <Text style={styles.noteText}>{personalNote}</Text>
-        </View>
+            <View style={styles.noteCard}>
+              <Text style={styles.noteText}>{personalNote}</Text>
+            </View>
+          </>
+        ) : null}
       </ScrollView>
 
       <View style={styles.bottomActionWrap}>
         <Pressable
           style={styles.primaryAction}
-          onPress={() => navigation.navigate('BookDetail', { title: bookTitle, author })}
+          onPress={() => {
+            if (!resolvedSummaryId) return;
+            navigation.navigate('BookDetail', { summaryId: resolvedSummaryId });
+          }}
+          disabled={!resolvedSummaryId}
         >
           <MaterialIcons name="menu-book" size={21} color="#FFFFFF" />
-          <Text style={styles.primaryActionText}>Mở trong tóm tắt</Text>
+          <Text style={styles.primaryActionText}>Mở tóm tắt</Text>
         </Pressable>
 
-        <Pressable style={styles.secondaryAction}>
-          <MaterialIcons name="image" size={21} color="#5341CD" />
-          <Text style={styles.secondaryActionText}>Chia sẻ dạng ảnh</Text>
+        <Pressable
+          style={styles.secondaryAction}
+          onPress={() => {
+            const context = buildChatContext({
+              source: 'summary',
+              summary,
+              insight,
+              extraText: 'Ngữ cảnh: Ý chính. Người dùng muốn hỏi sâu hơn về ý này.',
+            });
+            navigation.navigate('AskAI', {
+              initialPrompt: insight ? `Giải thích sâu hơn ý chính: "${insight.title}"` : 'Giải thích ý chính này rõ hơn.',
+              context,
+            });
+          }}
+        >
+          <MaterialIcons name="auto-awesome" size={21} color="#5341CD" />
+          <Text style={styles.secondaryActionText}>Hỏi về ý chính</Text>
         </Pressable>
       </View>
-    </SafeAreaView>
+    </Screen>
   );
 }
 
 const styles = StyleSheet.create({
-  safeArea: {
-    flex: 1,
-    backgroundColor: uiColors.background,
-  },
-  header: {
-    height: 62,
-    paddingHorizontal: uiSpacing.lg,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-  },
-  headerLeft: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 10,
+  screenContent: {
+    paddingHorizontal: 0,
   },
   iconBtn: {
     width: 34,
@@ -116,11 +138,6 @@ const styles = StyleSheet.create({
     borderRadius: 99,
     alignItems: 'center',
     justifyContent: 'center',
-  },
-  headerTitle: {
-    color: '#11172B',
-    fontSize: 20,
-    fontWeight: '700',
   },
   content: {
     paddingHorizontal: uiSpacing.lg,

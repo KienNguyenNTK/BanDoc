@@ -7,26 +7,20 @@ import {
   Text,
   View,
 } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
 import { StackNavigationProp } from '@react-navigation/stack';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import BottomNavBar from '../components/BottomNavBar';
 import FloatingAskBar from '../components/FloatingAskBar';
+import { Screen, TopBar } from '../components/ui';
 import { RootStackParamList } from '../navigation/AppNavigator';
-import { uiColors, uiSpacing, uiTypography } from '../theme/ui';
+import { uiSpacing, uiTypography } from '../theme/ui';
+import { buildChatContext, getInsight, getSummaryById, listNotesForLibrary, listSummaries, resolveNoteThumbSource } from '../data';
+import type { NoteItem } from '../types/content';
 
 type LibraryNavigationProp = StackNavigationProp<RootStackParamList, 'Library'>;
 
 type LibraryScreenProps = {
   navigation: LibraryNavigationProp;
-};
-
-type NoteItem = {
-  id: string;
-  type: 'quote' | 'highlight';
-  bookTitle: string;
-  text: string;
-  image: number;
 };
 
 type UploadItem = {
@@ -38,24 +32,7 @@ type UploadItem = {
   iconColor: string;
 };
 
-const LIBRARY_FILTERS = ['Tất cả sách', 'Yêu thích', 'Chưa đọc', 'Bộ sưu tập'];
-
-const NOTES: NoteItem[] = [
-  {
-    id: 'note-1',
-    type: 'quote',
-    bookTitle: 'Sapiens',
-    text: '"Điều giúp Homo Sapiens thống trị thế giới là khả năng tin vào những câu chuyện chung..."',
-    image: require('../assets/library/note-sapiens.jpg'),
-  },
-  {
-    id: 'note-2',
-    type: 'highlight',
-    bookTitle: 'Làm việc sâu',
-    text: '"Làm việc sâu là khả năng tập trung không xao nhãng vào nhiệm vụ nhận thức khó."',
-    image: require('../assets/library/note-deep-work.jpg'),
-  },
-];
+const LIBRARY_FILTERS = ['Tất cả', 'Đã lưu', 'Đang đọc', 'Bộ sưu tập'];
 
 const UPLOADS: UploadItem[] = [
   {
@@ -77,34 +54,47 @@ const UPLOADS: UploadItem[] = [
 ];
 
 export default function LibraryScreen({ navigation }: LibraryScreenProps) {
-  const [activeFilter, setActiveFilter] = React.useState('Tất cả sách');
+  const [activeFilter, setActiveFilter] = React.useState('Tất cả');
 
   const openAskChat = React.useCallback(
     (initialPrompt?: string) => {
-      navigation.navigate('AskAI', { initialPrompt });
+      const libraryContext = buildChatContext({
+        source: 'library',
+        extraText: `Ngữ cảnh: Thư viện. Bộ lọc hiện tại: "${activeFilter}".`,
+      });
+      navigation.navigate('AskAI', { initialPrompt, context: libraryContext });
     },
+    [activeFilter, navigation]
+  );
+
+  const openSummary = React.useCallback(
+    (summaryId: string) => navigation.navigate('BookDetail', { summaryId }),
     [navigation]
   );
 
+  const continueSummary = React.useMemo(() => getSummaryById('sapiens'), []);
+  const savedSummaries = React.useMemo(() => listSummaries(), []);
+  const notes = React.useMemo(() => listNotesForLibrary(), []);
+
   return (
-    <SafeAreaView edges={['top']} style={styles.safeArea}>
-      <View style={styles.header}>
-        <View style={styles.headerLeft}>
-          <Text style={styles.headerTitle}>Thư viện của tôi</Text>
-        </View>
-        <Pressable style={styles.iconBtn} onPress={() => navigation.navigate('UploadManagement')}>
-          <MaterialIcons name="ios-share" size={22} color="#60708A" />
-        </Pressable>
-      </View>
+    <Screen mode="static" edges={['top']} contentStyle={styles.screenContent}>
+      <TopBar
+        title="Thư viện của tôi"
+        right={
+          <Pressable style={styles.iconBtn} onPress={() => navigation.navigate('UploadManagement')}>
+            <MaterialIcons name="ios-share" size={22} color="#60708A" />
+          </Pressable>
+        }
+      />
 
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.content}>
         <View style={styles.goalCard}>
-          <Text style={styles.goalLabel}>MỤC TIÊU TUẦN</Text>
-          <Text style={styles.goalTitle}>5/7 ngày hoạt động</Text>
+          <Text style={styles.goalLabel}>THÓI QUEN TÓM TẮT</Text>
+          <Text style={styles.goalTitle}>5/7 ngày</Text>
           <View style={styles.goalProgressTrack}>
             <View style={styles.goalProgressFill} />
           </View>
-          <Text style={styles.goalHint}>Cố lên! Bạn chỉ còn 2 ngày để giữ streak.</Text>
+          <Text style={styles.goalHint}>Giữ nhịp đều để đọc tóm tắt nhanh hơn mỗi ngày.</Text>
         </View>
 
         <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.filterRow}>
@@ -132,26 +122,49 @@ export default function LibraryScreen({ navigation }: LibraryScreenProps) {
 
         <Pressable
           style={styles.continueCard}
-          onPress={() =>
-            navigation.navigate('BookDetail', {
-              title: 'Sapiens: Lược sử loài người',
-              author: 'Yuval Noah Harari',
-            })
-          }
+          onPress={() => openSummary('sapiens')}
         >
           <Image source={require('../assets/library/continue-reading.jpg')} style={styles.continueImage} />
           <View style={styles.continueMeta}>
-            <Text style={styles.continueTitle}>Sapiens: Lược sử loài người</Text>
-            <Text style={styles.continueAuthor}>Yuval Noah Harari</Text>
+            <Text style={styles.continueTitle}>{continueSummary?.title ?? 'Sapiens: Lược sử loài người'}</Text>
+            <Text style={styles.continueAuthor}>{continueSummary?.author ?? 'Yuval Noah Harari'}</Text>
             <View style={styles.progressRow}>
-              <Text style={styles.progressLabel}>TIẾN ĐỘ</Text>
-              <Text style={styles.progressPct}>64%</Text>
+              <Text style={styles.progressLabel}>Ý CHÍNH</Text>
+              <Text style={styles.progressPct}>1/3</Text>
             </View>
             <View style={styles.progressTrack}>
               <View style={styles.progressFill} />
             </View>
           </View>
         </Pressable>
+
+        <View style={styles.sectionHeaderRow}>
+          <Text style={styles.sectionTitle}>Đã lưu</Text>
+          <Pressable>
+            <Text style={styles.linkText}>Xem tất cả</Text>
+          </Pressable>
+        </View>
+
+        <View style={styles.uploadList}>
+          {savedSummaries.map((summary) => (
+            <Pressable
+              key={summary.id}
+              style={styles.uploadCard}
+              onPress={() => openSummary(summary.id)}
+            >
+              <View style={styles.uploadLeft}>
+                <View style={[styles.uploadIconWrap, styles.uploadIconWrapSaved]}>
+                  <MaterialIcons name="bookmark" size={23} color="#5341CD" />
+                </View>
+                <View>
+                  <Text style={styles.uploadTitle}>{summary.title}</Text>
+                  <Text style={styles.uploadMeta}>{`${summary.durationMinutes ?? 15} phút tóm tắt • ${summary.insights.length} ý chính`}</Text>
+                </View>
+              </View>
+              <MaterialIcons name="chevron-right" size={22} color="#7D7B8B" />
+            </Pressable>
+          ))}
+        </View>
 
         <View style={styles.sectionHeaderRow}>
           <Text style={styles.sectionTitle}>Ghi chú & nổi bật</Text>
@@ -161,57 +174,54 @@ export default function LibraryScreen({ navigation }: LibraryScreenProps) {
         </View>
 
         <View style={styles.notesList}>
-          {NOTES.map((note) => (
+          {notes.map((note: NoteItem) => {
+            const summary = getSummaryById(note.summaryId);
+            const insight = summary && note.insightId ? getInsight(summary, note.insightId) : undefined;
+            const noteTitle = summary?.title ?? 'Tóm tắt';
+            const subTitle = insight ? `Ý chính ${String(insight.index).padStart(2, '0')}: ${insight.title}` : '';
+
+            return (
             <Pressable
               key={note.id}
               style={styles.noteCard}
               onPress={() =>
                 navigation.navigate('InsightDetail', {
-                  bookTitle: note.bookTitle,
-                  author: note.bookTitle === 'Sapiens' ? 'Yuval Noah Harari' : 'Cal Newport',
-                  genre: 'Phi hư cấu',
-                  quote:
-                    note.bookTitle === 'Sapiens'
-                      ? '"Điều giúp Sapiens thống trị thế giới là khả năng tạo ra và cùng tin vào những hư cấu tập thể."'
-                      : '"Làm việc sâu là khả năng tập trung không xao nhãng vào một nhiệm vụ đòi hỏi nhận thức cao."',
-                  insightTitle:
-                    note.bookTitle === 'Sapiens'
-                      ? 'Insight 01 - Cuộc cách mạng nhận thức'
-                      : 'Insight 02 - Giá trị của sự tập trung',
-                  savedOn: note.bookTitle === 'Sapiens' ? 'Lưu ngày 12 tháng 10, 2023' : 'Lưu ngày 4 tháng 11, 2023',
-                  personalNote:
-                    note.bookTitle === 'Sapiens'
-                      ? "Điều này giải thích vì sao sự hợp tác quy mô lớn của con người là có thể. Doanh nghiệp, quốc gia và tôn giáo đều là các 'huyền thoại chung' giúp hàng triệu người xa lạ có thể phối hợp hiệu quả."
-                      : 'Tôi nên tạo khung 90 phút không thông báo mỗi ngày để làm việc sâu thay vì chia nhỏ công việc quá mức.',
+                  summaryId: note.summaryId,
+                  insightId: note.insightId,
+                  personalNote: note.excerpt,
+                  savedOn: 'Đã lưu',
                 })
               }
             >
               <View style={styles.noteTop}>
-                <Image source={note.image} style={styles.noteImage} />
+                <Image source={resolveNoteThumbSource(note) ?? require('../assets/library/continue-reading.jpg')} style={styles.noteImage} />
                 <View>
                   <View style={[styles.noteTypePill, note.type === 'quote' ? styles.quotePill : styles.highlightPill]}>
                     <Text style={[styles.noteTypeText, note.type === 'quote' ? styles.quoteText : styles.highlightText]}>
                       {note.type === 'quote' ? 'TRÍCH DẪN' : 'ĐÁNH DẤU'}
                     </Text>
                   </View>
-                  <Text style={styles.noteBookTitle}>{note.bookTitle}</Text>
+                  <Text style={styles.noteBookTitle}>{noteTitle}</Text>
+                  {subTitle ? <Text style={styles.noteBookSubTitle} numberOfLines={1}>{subTitle}</Text> : null}
                 </View>
               </View>
-              <Text style={styles.noteBody}>{note.text}</Text>
+              <Text style={styles.noteBody}>{note.excerpt}</Text>
               <Pressable
                 style={styles.noteActionBtn}
                 onPress={() =>
                   navigation.navigate('InsightDetail', {
-                    bookTitle: note.bookTitle,
-                    author: note.bookTitle === 'Sapiens' ? 'Yuval Noah Harari' : 'Cal Newport',
-                    genre: 'Phi hư cấu',
+                    summaryId: note.summaryId,
+                    insightId: note.insightId,
+                    personalNote: note.excerpt,
+                    savedOn: 'Đã lưu',
                   })
                 }
               >
                 <Text style={styles.noteActionText}>MỞ</Text>
               </Pressable>
             </Pressable>
-          ))}
+            );
+          })}
         </View>
 
         <View style={styles.sectionHeaderRow}>
@@ -247,26 +257,13 @@ export default function LibraryScreen({ navigation }: LibraryScreenProps) {
         onSubmitPrompt={(prompt) => openAskChat(prompt)}
       />
       <BottomNavBar activeTab="library" />
-    </SafeAreaView>
+    </Screen>
   );
 }
 
 const styles = StyleSheet.create({
-  safeArea: {
-    flex: 1,
-    backgroundColor: uiColors.background,
-  },
-  header: {
-    height: 60,
-    paddingHorizontal: uiSpacing.lg,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-  },
-  headerLeft: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 10,
+  screenContent: {
+    paddingHorizontal: 0,
   },
   iconBtn: {
     width: 34,
@@ -274,11 +271,6 @@ const styles = StyleSheet.create({
     borderRadius: 99,
     alignItems: 'center',
     justifyContent: 'center',
-  },
-  headerTitle: {
-    color: '#5F4ED6',
-    fontSize: uiTypography.h2,
-    fontWeight: '700',
   },
   content: {
     paddingHorizontal: uiSpacing.lg,
@@ -468,7 +460,13 @@ const styles = StyleSheet.create({
     marginTop: 3,
     color: '#191C1F',
     fontSize: uiTypography.body,
-    fontWeight: '500',
+    fontWeight: '700',
+  },
+  noteBookSubTitle: {
+    marginTop: 3,
+    color: '#787586',
+    fontSize: 12,
+    fontWeight: '600',
   },
   noteBody: {
     color: '#191C1F',
@@ -516,6 +514,9 @@ const styles = StyleSheet.create({
     borderRadius: 14,
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  uploadIconWrapSaved: {
+    backgroundColor: '#E4DFFF',
   },
   uploadTitle: {
     color: '#191C1F',

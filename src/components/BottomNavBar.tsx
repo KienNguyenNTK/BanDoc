@@ -6,6 +6,7 @@ import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { RootStackParamList } from '../navigation/AppNavigator';
 import { uiColors, uiSizing, uiTypography } from '../theme/ui';
+import { buildChatContext } from '../data';
 
 type BottomTab = 'home' | 'search' | 'ai' | 'library' | 'profile';
 
@@ -20,8 +21,8 @@ const COLORS = {
 
 const ITEMS: Array<{ key: BottomTab; label: string; icon: string }> = [
   { key: 'home', label: 'Trang chủ', icon: 'home' },
-  { key: 'search', label: 'Tìm kiếm', icon: 'search' },
-  { key: 'ai', label: 'AI', icon: 'auto-awesome' },
+  { key: 'search', label: 'Khám phá', icon: 'search' },
+  { key: 'ai', label: 'Hỏi đáp', icon: 'auto-awesome' },
   { key: 'library', label: 'Thư viện', icon: 'local-library' },
   { key: 'profile', label: 'Cá nhân', icon: 'person' },
 ];
@@ -47,7 +48,19 @@ export default function BottomNavBar({ activeTab = 'home' }: BottomNavBarProps) 
     }
 
     if (tab === 'ai') {
-      navigation.navigate('AskAI', {});
+      const source =
+        activeTab === 'search'
+          ? 'explore'
+          : activeTab === 'library'
+            ? 'library'
+            : activeTab === 'profile'
+              ? 'home'
+              : 'home';
+      const context = buildChatContext({
+        source,
+        extraText: 'Ngữ cảnh: mở Hỏi đáp từ tab bar.',
+      });
+      navigation.navigate('AskAI', { context });
       return;
     }
 

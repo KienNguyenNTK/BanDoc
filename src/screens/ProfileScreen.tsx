@@ -65,15 +65,15 @@ export default function ProfileScreen({ navigation }: ProfileScreenProps) {
               <MaterialIcons name="schedule" size={20} color="#5341CD" />
               <View>
                 <Text style={styles.statValue}>245 phút</Text>
-                <Text style={styles.statLabel}>TỔNG THỜI GIAN ĐỌC</Text>
+                <Text style={styles.statLabel}>TỔNG THỜI GIAN TÓM TẮT</Text>
               </View>
             </View>
 
             <View style={styles.statItem}>
               <MaterialIcons name="menu-book" size={20} color="#5341CD" />
               <View>
-                <Text style={styles.statValue}>18 cuốn</Text>
-                <Text style={styles.statLabel}>ĐÃ HOÀN THÀNH</Text>
+                <Text style={styles.statValue}>18 tóm tắt</Text>
+                <Text style={styles.statLabel}>ĐÃ ĐỌC</Text>
               </View>
             </View>
 
@@ -81,7 +81,7 @@ export default function ProfileScreen({ navigation }: ProfileScreenProps) {
               <MaterialIcons name="auto-stories" size={20} color="#5341CD" />
               <View>
                 <Text style={styles.statValue}>42 tóm tắt</Text>
-                <Text style={styles.statLabel}>ĐÃ TẠO</Text>
+                <Text style={styles.statLabel}>ĐÃ LƯU</Text>
               </View>
             </View>
 
@@ -89,21 +89,20 @@ export default function ProfileScreen({ navigation }: ProfileScreenProps) {
               <MaterialIcons name="headphones" size={20} color="#5341CD" />
               <View>
                 <Text style={styles.statValue}>9 phiên</Text>
-                <Text style={styles.statLabel}>CHẾ ĐỘ AUDIO</Text>
+                <Text style={styles.statLabel}>PHIÊN NGHE</Text>
               </View>
             </View>
           </View>
         </Pressable>
 
         <View style={styles.sectionBlock}>
-          <Text style={styles.sectionTitle}>Trung tâm dịch thuật</Text>
-          <Text style={styles.sectionSub}>Công cụ dịch, giữ ngữ cảnh và xây sơ đồ nội dung</Text>
+          <Text style={styles.sectionTitle}>Trung tâm studio</Text>
 
           <View style={styles.menuCard}>
             <Pressable style={styles.menuRow} onPress={() => navigation.navigate('TranslatorStudio')}>
               <View style={styles.menuRowLeft}>
                 <MaterialIcons name="translate" size={22} color="#5341CD" />
-                <Text style={styles.menuRowText}>Mở Xưởng dịch</Text>
+                <Text style={styles.menuRowText}>Mở Studio</Text>
               </View>
               <MaterialIcons name="chevron-right" size={22} color="#787586" />
             </Pressable>

@@ -8,13 +8,14 @@ import {
   TextInput,
   View,
 } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
 import { StackNavigationProp } from '@react-navigation/stack';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import BottomNavBar from '../components/BottomNavBar';
 import FloatingAskBar from '../components/FloatingAskBar';
+import { Screen, TopBar } from '../components/ui';
 import { RootStackParamList } from '../navigation/AppNavigator';
 import { uiColors, uiSpacing, uiTypography } from '../theme/ui';
+import { buildChatContext, listSummariesByCategory, listCategories, resolveSummaryCoverSource, searchSummaries } from '../data';
 
 type SearchScreenNavigationProp = StackNavigationProp<RootStackParamList, 'Search'>;
 
@@ -22,7 +23,7 @@ type SearchScreenProps = {
   navigation: SearchScreenNavigationProp;
 };
 
-const TRENDING_SEARCHES = ['Làm việc sâu', 'Naval Ravikant', 'Chủ nghĩa khắc kỷ', 'Đạo đức AI'];
+const TRENDING_SEARCHES = ['Năng suất', 'Lịch sử', 'Tư duy', 'Tập trung'];
 
 const TOP_AUTHORS = [
   {
@@ -47,41 +48,66 @@ const TOP_AUTHORS = [
   },
 ];
 
-const POPULAR_BOOKS = [
-  {
-    id: 'book-1',
-    title: 'The Psychology of Money',
-    author: 'Morgan Housel',
-    rating: '4.8 (2.4k)',
-    image: require('../assets/search/book-1.jpg'),
-  },
-  {
-    id: 'book-2',
-    title: "Can't Hurt Me",
-    author: 'David Goggins',
-    rating: '4.9 (5.1k)',
-    image: require('../assets/search/book-2.jpg'),
-  },
-];
+const pickTopicVisual = (topic: string) => {
+  const t = topic.trim().toLowerCase();
+
+  if (t.includes('năng suất') || t.includes('tập trung')) {
+    return { icon: 'timer', wrapStyle: styles.topicIconBlue, iconColor: '#2B4ACB' as const };
+  }
+  if (t.includes('lịch sử')) {
+    return { icon: 'account-balance', wrapStyle: styles.topicIconGreen, iconColor: '#00725B' as const };
+  }
+  if (t.includes('tư duy') || t.includes('triết')) {
+    return { icon: 'psychology', wrapStyle: styles.topicIconBrown, iconColor: '#884800' as const };
+  }
+  if (t.includes('kinh dị') || t.includes('hư cấu')) {
+    return { icon: 'auto-stories', wrapStyle: styles.topicIconPrimary, iconColor: '#FFFFFF' as const };
+  }
+  if (t.includes('kinh doanh') || t.includes('tài chính')) {
+    return { icon: 'payments', wrapStyle: styles.topicIconBrown, iconColor: '#884800' as const };
+  }
+
+  return { icon: 'local-offer', wrapStyle: styles.topicIconBrown, iconColor: '#884800' as const };
+};
 
 export default function SearchScreen({ navigation }: SearchScreenProps) {
   const [searchText, setSearchText] = React.useState('');
+  const categories = React.useMemo(() => listCategories().slice(0, 6), []);
 
   const openAskChat = React.useCallback(
     (initialPrompt?: string) => {
-      navigation.navigate('AskAI', { initialPrompt });
+      const exploreContext = buildChatContext({
+        source: 'explore',
+        extraText: `Ngữ cảnh: Khám phá. Từ khóa tìm kiếm hiện tại: "${searchText || '—'}"`,
+      });
+      navigation.navigate('AskAI', { initialPrompt, context: exploreContext });
+    },
+    [navigation, searchText]
+  );
+
+  const results = React.useMemo(() => searchSummaries(searchText), [searchText]);
+  const openSummary = React.useCallback(
+    (summaryId: string) => navigation.navigate('BookDetail', { summaryId }),
+    [navigation]
+  );
+
+  const openTopic = React.useCallback(
+    (topicTitle: string, description?: string) => {
+      navigation.navigate('TopicDetail', { title: topicTitle, description });
     },
     [navigation]
   );
 
   return (
-    <SafeAreaView edges={['top']} style={styles.safeArea}>
-      <View style={styles.header}>
-        <Text style={styles.headerTitle}>Tìm kiếm</Text>
-        <Pressable style={styles.filterBtn}>
-          <MaterialIcons name="filter-list" size={22} color="#6C5CE7" />
-        </Pressable>
-      </View>
+    <Screen mode="static" edges={['top']} contentStyle={styles.screenContent}>
+      <TopBar
+        title="Khám phá"
+        right={
+          <Pressable style={styles.filterBtn}>
+            <MaterialIcons name="filter-list" size={22} color={uiColors.primary} />
+          </Pressable>
+        }
+      />
 
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.content}>
         <View style={styles.searchInputWrap}>
@@ -89,7 +115,7 @@ export default function SearchScreen({ navigation }: SearchScreenProps) {
           <TextInput
             value={searchText}
             onChangeText={setSearchText}
-            placeholder="Tìm sách, tác giả hoặc chủ đề..."
+            placeholder="Tìm tóm tắt, tác giả hoặc chủ đề..."
             placeholderTextColor="#8D8A9D"
             style={styles.searchInput}
             returnKeyType="search"
@@ -104,14 +130,14 @@ export default function SearchScreen({ navigation }: SearchScreenProps) {
             <Text style={styles.aiTitle}>Hôm nay bạn muốn khám phá gì?</Text>
           </View>
           <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.aiPromptRow}>
-            <Pressable style={styles.aiPromptChip}>
+            <Pressable style={styles.aiPromptChip} onPress={() => openAskChat('Tôi nên đọc gì tiếp theo?')}>
               <Text style={styles.aiPromptText}>Tôi nên đọc gì tiếp theo?</Text>
             </Pressable>
-            <Pressable style={styles.aiPromptChip}>
+            <Pressable style={styles.aiPromptChip} onPress={() => openAskChat('Gợi ý tóm tắt 10 phút')}>
               <Text style={styles.aiPromptText}>Gợi ý tóm tắt 10 phút</Text>
             </Pressable>
-            <Pressable style={styles.aiPromptChip}>
-              <Text style={styles.aiPromptText}>Sách về sự tập trung</Text>
+            <Pressable style={styles.aiPromptChip} onPress={() => openAskChat('Gợi ý tóm tắt về sự tập trung')}>
+              <Text style={styles.aiPromptText}>Tóm tắt về sự tập trung</Text>
             </Pressable>
           </ScrollView>
         </View>
@@ -120,9 +146,10 @@ export default function SearchScreen({ navigation }: SearchScreenProps) {
           <Text style={styles.sectionTitle}>Tìm kiếm thịnh hành</Text>
           <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.trendingRow}>
             {TRENDING_SEARCHES.map((item, index) => (
-              <View
+              <Pressable
                 key={item}
                 style={[styles.trendingChip, index === 0 ? styles.trendingChipHighlight : undefined]}
+                onPress={() => openTopic(item, `Khám phá tóm tắt theo chủ đề ${item.toLowerCase()}.`)}
               >
                 {index === 0 ? <MaterialIcons name="trending-up" size={15} color="#00725B" /> : null}
                 <Text
@@ -133,7 +160,7 @@ export default function SearchScreen({ navigation }: SearchScreenProps) {
                 >
                   {item}
                 </Text>
-              </View>
+              </Pressable>
             ))}
           </ScrollView>
         </View>
@@ -141,77 +168,27 @@ export default function SearchScreen({ navigation }: SearchScreenProps) {
         <View>
           <Text style={styles.sectionTitle}>Khám phá chủ đề</Text>
           <View style={styles.topicGrid}>
-            <Pressable
-              style={styles.topicCardLight}
-              onPress={() =>
-                navigation.navigate('TopicDetail', {
-                  title: 'Tâm lý học',
-                  description: 'Hiểu về hành vi, trí nhớ và cách con người ra quyết định',
-                })
-              }
-            >
-              <View style={styles.topicIconBrown}>
-                <MaterialIcons name="psychology" size={18} color="#884800" />
+            {categories.map((cat, idx) => {
+              const primary = idx === 1;
+              const count = listSummariesByCategory(cat).length;
+              const meta = count > 0 ? `${count} tóm tắt` : 'Mới cập nhật';
+              const visual = pickTopicVisual(cat);
+              return (
+                <Pressable
+                  key={cat}
+                  style={primary ? styles.topicCardPrimary : styles.topicCardLight}
+                  onPress={() => openTopic(cat, `Khám phá tóm tắt theo chủ đề ${cat.toLowerCase()}.`)}
+                >
+              <View style={primary ? styles.topicIconPrimary : visual.wrapStyle}>
+                <MaterialIcons name={visual.icon as any} size={18} color={primary ? '#FFFFFF' : visual.iconColor} />
               </View>
               <View>
-                <Text style={styles.topicTitle}>Tâm lý học</Text>
-                <Text style={styles.topicMeta}>1.2k sách</Text>
+                <Text style={primary ? styles.topicTitlePrimary : styles.topicTitle}>{cat}</Text>
+                <Text style={primary ? styles.topicMetaPrimary : styles.topicMeta}>{meta}</Text>
               </View>
-            </Pressable>
-
-            <Pressable
-              style={styles.topicCardPrimary}
-              onPress={() =>
-                navigation.navigate('TopicDetail', {
-                  title: 'Tài chính',
-                  description: 'Nắm vững tư duy tiền bạc, đầu tư và quản trị tài sản cá nhân',
-                })
-              }
-            >
-              <View style={styles.topicIconPrimary}>
-                <MaterialIcons name="payments" size={18} color="#FFFFFF" />
-              </View>
-              <View>
-                <Text style={styles.topicTitlePrimary}>Tài chính</Text>
-                <Text style={styles.topicMetaPrimary}>850 sách</Text>
-              </View>
-            </Pressable>
-
-            <Pressable
-              style={styles.topicCardLight}
-              onPress={() =>
-                navigation.navigate('TopicDetail', {
-                  title: 'Khoa học & Công nghệ',
-                  description: 'Theo dõi các ý tưởng mới về khoa học ứng dụng và công nghệ hiện đại',
-                })
-              }
-            >
-              <View style={styles.topicIconGreen}>
-                <MaterialIcons name="science" size={22} color="#00725B" />
-              </View>
-              <View>
-                <Text style={styles.topicTitle}>Khoa học & Công nghệ</Text>
-                <Text style={styles.topicMeta}>Mới mỗi tuần</Text>
-              </View>
-            </Pressable>
-
-            <Pressable
-              style={styles.topicCardLight}
-              onPress={() =>
-                navigation.navigate('TopicDetail', {
-                  title: 'Phát triển bản thân',
-                  description: 'Xây thói quen tốt, tăng hiệu suất và phát triển tư duy bền vững',
-                })
-              }
-            >
-              <View style={styles.topicIconBlue}>
-                <MaterialIcons name="self-improvement" size={20} color="#2B4ACB" />
-              </View>
-              <View>
-                <Text style={styles.topicTitle}>Phát triển bản thân</Text>
-                <Text style={styles.topicMeta}>940 sách</Text>
-              </View>
-            </Pressable>
+                </Pressable>
+              );
+            })}
           </View>
         </View>
 
@@ -240,21 +217,24 @@ export default function SearchScreen({ navigation }: SearchScreenProps) {
         </View>
 
         <View>
-          <Text style={styles.sectionTitle}>Sách phổ biến</Text>
+          <Text style={styles.sectionTitle}>Tóm tắt nổi bật</Text>
           <View style={styles.bookList}>
-            {POPULAR_BOOKS.map((book) => (
+            {results.map((summary) => (
               <Pressable
-                key={book.id}
+                key={summary.id}
                 style={styles.bookCard}
-                onPress={() => navigation.navigate('BookDetail', { title: book.title, author: book.author })}
+                onPress={() => openSummary(summary.id)}
               >
-                <Image source={book.image} style={styles.bookCover} />
+                <Image
+                  source={resolveSummaryCoverSource(summary.id) ?? require('../assets/library/continue-reading.jpg')}
+                  style={styles.bookCover}
+                />
                 <View style={styles.bookMeta}>
-                  <Text style={styles.bookTitle}>{book.title}</Text>
-                  <Text style={styles.bookAuthor}>{book.author}</Text>
+                  <Text style={styles.bookTitle}>{summary.title}</Text>
+                  <Text style={styles.bookAuthor}>{summary.author ?? ''}</Text>
                   <View style={styles.ratingRow}>
-                    <MaterialIcons name="star" size={14} color="#AC5D00" />
-                    <Text style={styles.ratingText}>{book.rating}</Text>
+                    <MaterialIcons name="schedule" size={14} color="#00725B" />
+                    <Text style={styles.ratingText}>{`${summary.durationMinutes ?? 15} phút tóm tắt`}</Text>
                   </View>
                 </View>
               </Pressable>
@@ -264,31 +244,18 @@ export default function SearchScreen({ navigation }: SearchScreenProps) {
       </ScrollView>
 
       <FloatingAskBar
-        placeholder="Hỏi về sách, tác giả hoặc chủ đề..."
+        placeholder="Hỏi về tóm tắt, tác giả hoặc chủ đề..."
         onOpenFullChat={() => openAskChat()}
         onSubmitPrompt={(prompt) => openAskChat(prompt)}
       />
       <BottomNavBar activeTab="search" />
-    </SafeAreaView>
+    </Screen>
   );
 }
 
 const styles = StyleSheet.create({
-  safeArea: {
-    flex: 1,
-    backgroundColor: uiColors.background,
-  },
-  header: {
-    paddingHorizontal: uiSpacing.lg,
-    paddingBottom: 6,
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-  headerTitle: {
-    fontSize: uiTypography.h2,
-    fontWeight: '800',
-    color: '#6C5CE7',
+  screenContent: {
+    paddingHorizontal: 0,
   },
   filterBtn: {
     width: 40,

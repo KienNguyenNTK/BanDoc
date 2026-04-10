@@ -1,10 +1,10 @@
 import React from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
 import { StackNavigationProp } from '@react-navigation/stack';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import { RootStackParamList } from '../navigation/AppNavigator';
-import { uiColors, uiSpacing } from '../theme/ui';
+import { Screen, TopBar } from '../components/ui';
+import { uiSpacing } from '../theme/ui';
 
 type TranslatorPreparingNavigationProp = StackNavigationProp<RootStackParamList, 'TranslatorPreparing'>;
 
@@ -14,15 +14,8 @@ type TranslatorPreparingScreenProps = {
 
 export default function TranslatorPreparingScreen({ navigation }: TranslatorPreparingScreenProps) {
   return (
-    <SafeAreaView style={styles.safeArea}>
-      <View style={styles.header}>
-        <View style={styles.headerLeft}>
-          <Pressable style={styles.iconBtn} onPress={() => navigation.goBack()}>
-            <MaterialIcons name="arrow-back" size={24} color="#5341CD" />
-          </Pressable>
-          <Text style={styles.headerTitle}>Đang chuẩn bị dự án</Text>
-        </View>
-      </View>
+    <Screen mode="static" edges={['top']} contentStyle={styles.screenContent}>
+      <TopBar title="Đang chuẩn bị dự án" onBack={() => navigation.goBack()} tone="primary" />
 
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.content}>
         <Text style={styles.subtitle}>Bản thảo của bạn đang được tải lên và xử lý</Text>
@@ -94,22 +87,12 @@ export default function TranslatorPreparingScreen({ navigation }: TranslatorPrep
           </Pressable>
         </View>
       </ScrollView>
-    </SafeAreaView>
+    </Screen>
   );
 }
 
 const styles = StyleSheet.create({
-  safeArea: { flex: 1, backgroundColor: uiColors.background },
-  header: {
-    height: 60,
-    paddingHorizontal: uiSpacing.lg,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-  },
-  headerLeft: { flexDirection: 'row', alignItems: 'center', gap: 8, flex: 1 },
-  iconBtn: { width: 34, height: 34, borderRadius: 99, alignItems: 'center', justifyContent: 'center' },
-  headerTitle: { color: '#191C1F', fontSize: 17, fontWeight: '700' },
+  screenContent: { paddingHorizontal: 0 },
   content: { paddingHorizontal: uiSpacing.lg, paddingTop: 8, paddingBottom: 26, gap: 14 },
   subtitle: { color: '#474554', fontSize: 14.17, lineHeight: 22.5 },
   fileCard: {

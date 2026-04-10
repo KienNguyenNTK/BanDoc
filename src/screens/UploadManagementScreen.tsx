@@ -38,22 +38,6 @@ const INITIAL_UPLOADS: RecentUpload[] = [
   { id: 'r3', title: 'History Lecture Scan.pdf', status: 'failed' },
 ];
 
-const formatLabel = (index: number) => {
-  if (index === 0) {
-    return 'Sẵn sàng';
-  }
-
-  if (index === 1) {
-    return 'Đang tóm tắt';
-  }
-
-  if (index === 2) {
-    return 'Đang dựng sơ đồ';
-  }
-
-  return 'Hoàn tất';
-};
-
 export default function UploadManagementScreen({ navigation }: UploadManagementScreenProps) {
   const [steps, setSteps] = React.useState<ProcessStep[]>(INITIAL_STEPS);
   const [currentFile, setCurrentFile] = React.useState('World History Notes.pdf');
@@ -172,7 +156,8 @@ export default function UploadManagementScreen({ navigation }: UploadManagementS
 
   const onSelectFile = () => {
     const name = `Tai_lieu_moi_${Math.floor(Math.random() * 100)}.pdf`;
-    void startMockPipeline(name);
+    startMockPipeline(name).catch(() => {
+    });
   };
 
   return (
@@ -265,7 +250,7 @@ export default function UploadManagementScreen({ navigation }: UploadManagementS
 
           <View style={styles.timelineWrap}>
             <View style={styles.timelineLine} />
-            {steps.map((step, idx) => {
+            {steps.map((step) => {
               const color = step.state === 'done' ? '#00856D' : step.state === 'active' ? '#5341CD' : '#A9A9B2';
               return (
                 <View key={step.id} style={styles.stepRow}>

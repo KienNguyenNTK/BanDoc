@@ -7,14 +7,15 @@ import {
   Text,
   View,
 } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
 import { RouteProp } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import BottomNavBar from '../components/BottomNavBar';
 import FloatingAskBar from '../components/FloatingAskBar';
+import { Screen, SectionHeader, TopBar } from '../components/ui';
 import { RootStackParamList } from '../navigation/AppNavigator';
 import { uiColors, uiSpacing } from '../theme/ui';
+import { buildChatContext, listSummariesByCategory, resolveSummaryCoverSource } from '../data';
 
 type TopicDetailRouteProp = RouteProp<RootStackParamList, 'TopicDetail'>;
 type TopicDetailNavigationProp = StackNavigationProp<RootStackParamList, 'TopicDetail'>;
@@ -24,33 +25,6 @@ type TopicDetailScreenProps = {
   navigation: TopicDetailNavigationProp;
 };
 
-const BOOKS = [
-  {
-    id: 'topic-book-1',
-    title: 'Tư duy nhanh và chậm',
-    author: 'Daniel Kahneman',
-    rating: '4.8',
-    reviews: '12k đánh giá',
-    image: require('../assets/topic/topic-book-1.jpg'),
-  },
-  {
-    id: 'topic-book-2',
-    title: 'Phi lý trí có thể dự đoán',
-    author: 'Dan Ariely',
-    rating: '4.6',
-    reviews: '8.5k đánh giá',
-    image: require('../assets/topic/topic-book-2.jpg'),
-  },
-  {
-    id: 'topic-book-3',
-    title: 'Người đàn ông nhầm vợ mình là chiếc mũ',
-    author: 'Oliver Sacks',
-    rating: '4.9',
-    reviews: '5.2k đánh giá',
-    image: require('../assets/topic/topic-book-3.jpg'),
-  },
-];
-
 const CONCEPTS = ['Nhận thức', 'Thiên kiến', 'Hành vi', 'Trí nhớ', 'Động lực', 'Ra quyết định'];
 const RELATED_TOPICS = ['Triết học', 'Năng suất', 'Kinh tế học hành vi'];
 
@@ -58,27 +32,31 @@ export default function TopicDetailScreen({ route, navigation }: TopicDetailScre
   const topicTitle = route.params?.title ?? 'Tâm lý học';
   const topicDescription =
     route.params?.description ?? 'Hiểu về hành vi, trí nhớ và cách con người ra quyết định';
+  const summaries = React.useMemo(() => listSummariesByCategory(topicTitle), [topicTitle]);
 
   const openAskChat = React.useCallback(
     (initialPrompt?: string) => {
-      navigation.navigate('AskAI', { initialPrompt });
+      const context = buildChatContext({
+        source: 'explore',
+        extraText: `Ngữ cảnh: Chủ đề "${topicTitle}". ${topicDescription}`,
+      });
+      navigation.navigate('AskAI', { initialPrompt, context });
     },
-    [navigation]
+    [navigation, topicDescription, topicTitle]
   );
 
   return (
-    <SafeAreaView edges={['top']} style={styles.safeArea}>
-      <View style={styles.topBar}>
-        <View style={styles.topBarLeft}>
-          <Pressable style={styles.topBtn} onPress={() => navigation.goBack()}>
-            <MaterialIcons name="arrow-back" size={22} color="#6C5CE7" />
+    <Screen mode="static" edges={['top']} contentStyle={styles.screenContent}>
+      <TopBar
+        title="Chủ đề"
+        onBack={() => navigation.goBack()}
+        tone="primary"
+        right={
+          <Pressable style={styles.bookmarkBtn}>
+            <MaterialIcons name="bookmark-border" size={20} color="#64748B" />
           </Pressable>
-          <Text style={styles.topTitle}>Chủ đề</Text>
-        </View>
-        <Pressable style={styles.bookmarkBtn}>
-          <MaterialIcons name="bookmark-border" size={20} color="#64748B" />
-        </Pressable>
-      </View>
+        }
+      />
 
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.content}>
         <View style={styles.headerSection}>
@@ -97,7 +75,7 @@ export default function TopicDetailScreen({ route, navigation }: TopicDetailScre
         </View>
 
         <View>
-          <Text style={styles.sectionTitle}>Khái niệm chính</Text>
+          <SectionHeader title="Khái niệm chính" />
           <View style={styles.chipWrap}>
             {CONCEPTS.map((concept, index) => (
               <View key={concept} style={styles.conceptChip}>
@@ -110,40 +88,54 @@ export default function TopicDetailScreen({ route, navigation }: TopicDetailScre
         </View>
 
         <View>
-          <View style={styles.sectionHeaderRow}>
-            <Text style={styles.sectionTitle}>Sách liên quan chủ đề</Text>
-            <Pressable>
-              <Text style={styles.seeAllText}>Xem tất cả</Text>
-            </Pressable>
-          </View>
+          <SectionHeader title="Tóm tắt liên quan" rightLabel="Xem tất cả" />
 
-          <View style={styles.bookList}>
-            {BOOKS.map((book) => (
-              <Pressable
-                key={book.id}
-                style={styles.bookCard}
-                onPress={() => navigation.navigate('BookDetail', { title: book.title, author: book.author })}
-              >
-                <Image source={book.image} style={styles.bookCover} />
-                <View style={styles.bookMeta}>
-                  <Text style={styles.bookTitleText}>{book.title}</Text>
-                  <Text style={styles.bookAuthor}>{book.author}</Text>
-                  <View style={styles.ratingRow}>
-                    <MaterialIcons name="star" size={15} color="#6C5CE7" />
-                    <Text style={styles.ratingValue}>{book.rating}</Text>
-                    <Text style={styles.ratingCount}>{book.reviews}</Text>
+          {summaries.length === 0 ? (
+            <View style={styles.emptyCard}>
+              <Text style={styles.emptyTitle}>Chưa có tóm tắt cho chủ đề này</Text>
+              <Text style={styles.emptyText}>Bạn có thể thử một chủ đề khác hoặc hỏi Bạn Đọc để được gợi ý.</Text>
+            </View>
+          ) : (
+            <View style={styles.bookList}>
+              {summaries.map((summary) => (
+                <Pressable
+                  key={summary.id}
+                  style={styles.bookCard}
+                  onPress={() => navigation.navigate('BookDetail', { summaryId: summary.id })}
+                >
+                  <Image
+                    source={resolveSummaryCoverSource(summary.id) ?? require('../assets/library/continue-reading.jpg')}
+                    style={styles.bookCover}
+                  />
+                  <View style={styles.bookMeta}>
+                    <Text style={styles.bookTitleText}>{summary.title}</Text>
+                    {summary.author ? <Text style={styles.bookAuthor}>{summary.author}</Text> : null}
+                    <View style={styles.ratingRow}>
+                      <MaterialIcons name="star" size={15} color="#6C5CE7" />
+                      <Text style={styles.ratingValue}>4.8</Text>
+                      <Text style={styles.ratingCount}>{`${summary.durationMinutes ?? 12} phút tóm tắt`}</Text>
+                    </View>
                   </View>
-                </View>
-              </Pressable>
-            ))}
-          </View>
+                </Pressable>
+              ))}
+            </View>
+          )}
         </View>
 
         <View>
           <Text style={styles.sectionTitle}>Chủ đề liên quan</Text>
           <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.relatedRow}>
             {RELATED_TOPICS.map((item) => (
-              <Pressable key={item} style={styles.relatedChip}>
+              <Pressable
+                key={item}
+                style={styles.relatedChip}
+                onPress={() =>
+                  navigation.push('TopicDetail', {
+                    title: item,
+                    description: `Khám phá tóm tắt theo chủ đề ${item.toLowerCase()}.`,
+                  })
+                }
+              >
                 <Text style={styles.relatedChipText}>{item}</Text>
               </Pressable>
             ))}
@@ -157,40 +149,13 @@ export default function TopicDetailScreen({ route, navigation }: TopicDetailScre
         onSubmitPrompt={(prompt) => openAskChat(prompt)}
       />
       <BottomNavBar activeTab="search" />
-    </SafeAreaView>
+    </Screen>
   );
 }
 
 const styles = StyleSheet.create({
-  safeArea: {
-    flex: 1,
-    backgroundColor: uiColors.background,
-  },
-  topBar: {
-    height: 60,
-    paddingHorizontal: uiSpacing.lg,
-    borderBottomWidth: 1,
-    borderBottomColor: '#ECE9F4',
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-  },
-  topBarLeft: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 10,
-  },
-  topBtn: {
-    width: 34,
-    height: 34,
-    borderRadius: 99,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  topTitle: {
-    fontSize: 30,
-    color: '#6C5CE7',
-    fontWeight: '700',
+  screenContent: {
+    paddingHorizontal: 0,
   },
   bookmarkBtn: {
     width: 44,
@@ -276,19 +241,6 @@ const styles = StyleSheet.create({
   conceptTextPrimary: {
     color: '#6C5CE7',
   },
-  sectionHeaderRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-  },
-  seeAllText: {
-    color: '#6C5CE7',
-    fontSize: 13,
-    fontWeight: '800',
-    textTransform: 'uppercase',
-    letterSpacing: 0.5,
-    marginBottom: 8,
-  },
   bookList: {
     gap: 10,
   },
@@ -354,5 +306,24 @@ const styles = StyleSheet.create({
     color: '#191C1F',
     fontSize: 14,
     fontWeight: '600',
+  },
+  emptyCard: {
+    borderRadius: 16,
+    backgroundColor: '#FFFFFF',
+    padding: 16,
+    borderWidth: 1,
+    borderColor: '#E3E8EF',
+  },
+  emptyTitle: {
+    color: '#191C1F',
+    fontSize: 16,
+    fontWeight: '800',
+  },
+  emptyText: {
+    marginTop: 6,
+    color: '#787586',
+    fontSize: 13,
+    lineHeight: 19,
+    fontWeight: '500',
   },
 });

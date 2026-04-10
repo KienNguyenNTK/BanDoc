@@ -7,12 +7,12 @@ import {
   Text,
   View,
 } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
 import { StackNavigationProp } from '@react-navigation/stack';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import FontAwesome5 from 'react-native-vector-icons/FontAwesome5';
 import { RootStackParamList } from '../navigation/AppNavigator';
 import AppTextInput from '../components/AppTextInput';
+import { Screen } from '../components/ui';
 import { uiColors, uiRadius, uiSizing, uiSpacing, uiTypography } from '../theme/ui';
 
 type SignUpNavigationProp = StackNavigationProp<RootStackParamList, 'SignUp'>;
@@ -40,7 +40,7 @@ export default function SignUpScreen({ navigation }: SignUpScreenProps) {
   };
 
   return (
-    <SafeAreaView style={styles.safeArea}>
+    <Screen mode="static" edges={['top']} contentStyle={styles.screenContent}>
       <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
 
         <View style={styles.heroWrap}>
@@ -48,7 +48,7 @@ export default function SignUpScreen({ navigation }: SignUpScreenProps) {
             <MaterialIcons name="auto-awesome" size={34} color="#FFFFFF" />
           </View>
           <Text style={styles.title}>Tạo tài khoản</Text>
-          <Text style={styles.subtitle}>Bắt đầu hành trình đọc thông minh cùng Bạn Đọc</Text>
+          <Text style={styles.subtitle}>Bắt đầu đọc tóm tắt nhanh, xem sơ đồ và hỏi đáp theo ngữ cảnh</Text>
         </View>
 
         <View style={styles.card}>
@@ -126,14 +126,13 @@ export default function SignUpScreen({ navigation }: SignUpScreenProps) {
           </Pressable>
         </View>
       </ScrollView>
-    </SafeAreaView>
+    </Screen>
   );
 }
 
 const styles = StyleSheet.create({
-  safeArea: {
-    flex: 1,
-    backgroundColor: COLORS.background,
+  screenContent: {
+    paddingHorizontal: 0,
   },
   content: {
     paddingHorizontal: uiSpacing.xl,

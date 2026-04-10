@@ -1,10 +1,11 @@
 import React from 'react';
 import { Image, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
 import { StackNavigationProp } from '@react-navigation/stack';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import { RootStackParamList } from '../navigation/AppNavigator';
-import { uiColors, uiSpacing } from '../theme/ui';
+import { Screen, TopBar } from '../components/ui';
+import { uiSpacing } from '../theme/ui';
+import { buildChatContext } from '../data';
 
 type TranslatorStudioNavigationProp = StackNavigationProp<RootStackParamList, 'TranslatorStudio'>;
 
@@ -14,19 +15,16 @@ type TranslatorStudioScreenProps = {
 
 export default function TranslatorStudioScreen({ navigation }: TranslatorStudioScreenProps) {
   return (
-    <SafeAreaView style={styles.safeArea}>
-      <View style={styles.header}>
-        <View style={styles.headerLeft}>
-          <Pressable style={styles.iconBtn} onPress={() => navigation.goBack()}>
-            <MaterialIcons name="arrow-back" size={24} color="#191C1F" />
+    <Screen mode="static" edges={['top']} contentStyle={styles.screenContent}>
+      <TopBar
+        title="Xưởng dịch"
+        onBack={() => navigation.goBack()}
+        right={
+          <Pressable style={styles.iconBtn} onPress={() => navigation.navigate('Settings')}>
+            <MaterialIcons name="settings" size={23} color="#64748B" />
           </Pressable>
-          <Text style={styles.headerTitle}>Xưởng dịch</Text>
-        </View>
-        <Pressable style={styles.iconBtn} onPress={() => navigation.navigate('Settings')}>
-          <MaterialIcons name="settings" size={23} color="#64748B" />
-        </Pressable>
-      </View>
-
+        }
+      />
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.content}>
         <View style={styles.welcomeSection}>
           <Text style={styles.welcomeTitle}>Chào buổi sáng.</Text>
@@ -114,7 +112,15 @@ export default function TranslatorStudioScreen({ navigation }: TranslatorStudioS
 
         <Pressable
           style={styles.askBar}
-          onPress={() => navigation.navigate('AskAI', { initialPrompt: 'Hãy kiểm tra tính nhất quán tên nhân vật cho bản thảo này.' })}
+          onPress={() =>
+            navigation.navigate('AskAI', {
+              initialPrompt: 'Hãy kiểm tra tính nhất quán tên nhân vật cho bản thảo này.',
+              context: buildChatContext({
+                source: 'explore',
+                extraText: 'Ngữ cảnh: Studio (dev).',
+              }),
+            })
+          }
         >
           <View style={styles.askIconWrap}>
             <MaterialIcons name="auto-awesome" size={18} color="#5341CD" />
@@ -123,22 +129,13 @@ export default function TranslatorStudioScreen({ navigation }: TranslatorStudioS
           <MaterialIcons name="arrow-forward" size={20} color="#B0AEC0" />
         </Pressable>
       </ScrollView>
-    </SafeAreaView>
+    </Screen>
   );
 }
 
 const styles = StyleSheet.create({
-  safeArea: { flex: 1, backgroundColor: uiColors.background },
-  header: {
-    height: 60,
-    paddingHorizontal: uiSpacing.lg,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-  },
-  headerLeft: { flexDirection: 'row', alignItems: 'center', gap: 8, flex: 1 },
+  screenContent: { paddingHorizontal: 0 },
   iconBtn: { width: 34, height: 34, borderRadius: 99, alignItems: 'center', justifyContent: 'center' },
-  headerTitle: { color: '#5341CD', fontSize: 16.67, fontWeight: '700' },
   content: { paddingHorizontal: uiSpacing.lg, paddingTop: 8, paddingBottom: 28, gap: 18 },
   welcomeSection: { gap: 4 },
   welcomeTitle: { color: '#191C1F', fontSize: 30, fontWeight: '800' },

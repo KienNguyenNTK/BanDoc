@@ -1,10 +1,10 @@
 import React from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
 import { StackNavigationProp } from '@react-navigation/stack';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import { RootStackParamList } from '../navigation/AppNavigator';
-import { uiColors, uiSpacing } from '../theme/ui';
+import { Screen, TopBar, TopTabs } from '../components/ui';
+import { uiSpacing } from '../theme/ui';
 
 type TranslatorChapterSourceNavigationProp = StackNavigationProp<RootStackParamList, 'TranslatorChapterSource'>;
 
@@ -14,33 +14,26 @@ type TranslatorChapterSourceScreenProps = {
 
 export default function TranslatorChapterSourceScreen({ navigation }: TranslatorChapterSourceScreenProps) {
   return (
-    <SafeAreaView style={styles.safeArea}>
-      <View style={styles.headerWrap}>
-        <View style={styles.headerTop}>
-          <View style={styles.headerLeft}>
-            <Pressable style={styles.iconBtn} onPress={() => navigation.goBack()}>
-              <MaterialIcons name="arrow-back" size={23} color="#5341CD" />
-            </Pressable>
-            <View>
-              <Text style={styles.chapterTitle}>Chương 12: Cuộc chạm trán đầu tiên</Text>
-              <Text style={styles.bookName}>The Shadow over Innsmouth</Text>
-            </View>
-          </View>
-          <View style={styles.badge}><Text style={styles.badgeText}>BẢN NHÁP</Text></View>
-        </View>
-
-        <View style={styles.tabsRow}>
-          <Pressable style={[styles.tabBtn, styles.tabBtnActive]}>
-            <Text style={[styles.tabText, styles.tabTextActive]}>Nguồn</Text>
-          </Pressable>
-          <Pressable style={styles.tabBtn} onPress={() => navigation.navigate('TranslatorChapterTranslation')}>
-            <Text style={styles.tabText}>Bản dịch</Text>
-          </Pressable>
-          <Pressable style={styles.tabBtn} onPress={() => navigation.navigate('TranslatorChapterGraph')}>
-            <Text style={styles.tabText}>Sơ đồ</Text>
-          </Pressable>
-        </View>
-      </View>
+    <Screen mode="static" edges={['top']} contentStyle={styles.screenContent}>
+      <TopBar
+        title="Chương 12: Cuộc chạm trán đầu tiên"
+        subtitle="The Shadow over Innsmouth"
+        badgeText="BẢN NHÁP"
+        onBack={() => navigation.goBack()}
+        tone="primary"
+      />
+      <TopTabs
+        value="source"
+        options={[
+          { key: 'source', label: 'Nguồn' },
+          { key: 'translation', label: 'Bản dịch' },
+          { key: 'graph', label: 'Sơ đồ' },
+        ]}
+        onChange={(key) => {
+          if (key === 'translation') navigation.navigate('TranslatorChapterTranslation');
+          if (key === 'graph') navigation.navigate('TranslatorChapterGraph');
+        }}
+      />
 
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.content}>
         <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.chipsRow}>
@@ -84,25 +77,12 @@ export default function TranslatorChapterSourceScreen({ navigation }: Translator
           <MaterialIcons name="translate" size={18} color="#FFFFFF" />
         </Pressable>
       </View>
-    </SafeAreaView>
+    </Screen>
   );
 }
 
 const styles = StyleSheet.create({
-  safeArea: { flex: 1, backgroundColor: uiColors.background },
-  headerWrap: { paddingHorizontal: uiSpacing.lg, paddingTop: 8, paddingBottom: 6 },
-  headerTop: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
-  headerLeft: { flexDirection: 'row', alignItems: 'center', gap: 8, flex: 1, paddingRight: 8 },
-  iconBtn: { width: 34, height: 34, borderRadius: 99, alignItems: 'center', justifyContent: 'center' },
-  chapterTitle: { color: '#191C1F', fontSize: 19.17, fontWeight: '700' },
-  bookName: { color: '#516582', fontSize: 14, fontWeight: '600' },
-  badge: { backgroundColor: '#E8E6FA', borderRadius: 999, paddingHorizontal: 12, paddingVertical: 6 },
-  badgeText: { color: '#5341CD', fontSize: 12, fontWeight: '700', letterSpacing: 1.2 },
-  tabsRow: { marginTop: 12, flexDirection: 'row', gap: 8 },
-  tabBtn: { flex: 1, minHeight: 54, borderRadius: 12, alignItems: 'center', justifyContent: 'center' },
-  tabBtnActive: { backgroundColor: '#E7E6F9' },
-  tabText: { color: '#2D3A4D', fontSize: 16.67, fontWeight: '500' },
-  tabTextActive: { color: '#5341CD', fontWeight: '700' },
+  screenContent: { paddingHorizontal: 0 },
   content: { paddingHorizontal: uiSpacing.lg, paddingBottom: 180, gap: 14 },
   chipsRow: { gap: 8, paddingBottom: 6, paddingTop: 2 },
   helperChip: {

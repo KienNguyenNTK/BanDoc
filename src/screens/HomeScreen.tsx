@@ -9,14 +9,16 @@ import {
   Text,
   View,
 } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
 import { StackNavigationProp } from '@react-navigation/stack';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import { RootStackParamList } from '../navigation/AppNavigator';
 import BottomNavBar from '../components/BottomNavBar';
 import FloatingAskBar from '../components/FloatingAskBar';
 import AskAIBottomSheet from '../components/AskAIBottomSheet';
+import { Screen } from '../components/ui';
 import { uiColors, uiSpacing, uiTypography } from '../theme/ui';
+import { buildChatContext, getSummaryById, listSummaries } from '../data';
+import type { BookSummary } from '../types/content';
 
 type HomeScreenNavigationProp = StackNavigationProp<RootStackParamList, 'Home'>;
 
@@ -26,6 +28,7 @@ type HomeScreenProps = {
 
 type BookCard = {
   id: string;
+  summaryId: string;
   title: string;
   author: string;
   image: ImageSourcePropType;
@@ -39,30 +42,33 @@ type CollectionCard = {
 };
 
 const COLORS = {
-  background: '#F7F8FC',
-  surface: '#FFFFFF',
-  primary: '#6C5CE7',
-  text: '#191C1F',
-  mutedText: '#474554',
-  border: '#C8C4D7',
+  background: uiColors.background,
+  surface: uiColors.surface,
+  primary: uiColors.primary,
+  text: uiColors.text,
+  mutedText: uiColors.textMuted,
+  border: uiColors.border,
   secondary: '#00B894',
 };
 
 const TRENDING_BOOKS: BookCard[] = [
   {
     id: 'trending-1',
+    summaryId: 'sapiens',
     title: 'Thói quen nguyên tử',
     author: 'James Clear',
     image: require('../assets/home/home-2.jpg'),
   },
   {
     id: 'trending-2',
+    summaryId: 'deep-work',
     title: 'Nhà giả kim',
     author: 'Paulo Coelho',
     image: require('../assets/home/home-3.jpg'),
   },
   {
     id: 'trending-3',
+    summaryId: 'deep-work',
     title: 'Làm việc sâu',
     author: 'Cal Newport',
     image: require('../assets/home/home-4.jpg'),
@@ -72,12 +78,14 @@ const TRENDING_BOOKS: BookCard[] = [
 const RECOMMENDED_BOOKS: BookCard[] = [
   {
     id: 'rec-1',
+    summaryId: 'sapiens',
     title: 'Tập trung',
     author: 'Daniel Goleman',
     image: require('../assets/home/home-5.jpg'),
   },
   {
     id: 'rec-2',
+    summaryId: 'deep-work',
     title: 'Câu lạc bộ 5 giờ sáng',
     author: 'Robin Sharma',
     image: require('../assets/home/home-6.jpg'),
@@ -88,13 +96,13 @@ const COLLECTIONS: CollectionCard[] = [
   {
     id: 'col-1',
     title: 'Tủ sách cho nhà sáng lập',
-    countLabel: '8 cuốn',
+    countLabel: '8 tóm tắt',
     image: require('../assets/home/home-7.jpg'),
   },
   {
     id: 'col-2',
     title: 'Chánh niệm và dòng chảy',
-    countLabel: '12 cuốn',
+    countLabel: '12 tóm tắt',
     image: require('../assets/home/home-8.jpg'),
   },
 ];
@@ -111,17 +119,36 @@ const TOPICS = [
 export default function HomeScreen({ navigation }: HomeScreenProps) {
   const [askModalVisible, setAskModalVisible] = useState(false);
 
+  const homeContext = React.useMemo(() => {
+    const featured = getSummaryById('sapiens');
+    return buildChatContext({
+      source: 'home',
+      summary: featured,
+      extraText: 'Ngữ cảnh: trang chủ. Người dùng muốn khám phá tóm tắt phù hợp và gợi ý đọc tiếp.',
+    });
+  }, []);
+
   const openAskChat = (initialPrompt?: string) => {
     setAskModalVisible(false);
-    navigation.navigate('AskAI', { initialPrompt });
+    navigation.navigate('AskAI', { initialPrompt, context: homeContext });
   };
 
+  const openSummary = React.useCallback(
+    (summaryId: string) => {
+      navigation.navigate('BookDetail', { summaryId });
+    },
+    [navigation]
+  );
+
+  const newSummaries = React.useMemo(() => listSummaries().slice(0, 3), []);
+  const featuredSummary = React.useMemo<BookSummary | undefined>(() => getSummaryById('sapiens'), []);
+
   return (
-    <SafeAreaView edges={['top']} style={styles.safeArea}>
+    <Screen mode="static" edges={['top']} contentStyle={styles.screenContent}>
       <View style={styles.header}>
         <View>
           <Text style={styles.greeting}>Chào buổi tối, Alex</Text>
-          <Text style={styles.headerTitle}>Sẵn sàng học điều mới hôm nay?</Text>
+          <Text style={styles.headerTitle}>Sẵn sàng nắm ý chính hôm nay?</Text>
         </View>
         <Pressable
           style={styles.notificationButton}
@@ -154,30 +181,25 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
               <Text style={styles.chipText}>Gợi ý tóm tắt trong 10 phút</Text>
             </Pressable>
             <Pressable style={styles.chip}>
-              <Text style={styles.chipText}>Sách về tập trung</Text>
+              <Text style={styles.chipText}>Tóm tắt về tập trung</Text>
             </Pressable>
           </ScrollView>
         </View>
 
         <View>
-          <Text style={styles.sectionTitle}>Tiếp tục học</Text>
+          <Text style={styles.sectionTitle}>Tiếp tục đọc</Text>
           <Pressable
             style={styles.continueCard}
-            onPress={() =>
-              navigation.navigate('BookDetail', {
-                title: 'Sapiens: Lược sử loài người',
-                author: 'Yuval Noah Harari',
-              })
-            }
+            onPress={() => openSummary('sapiens')}
           >
             <Image
               source={require('../assets/home/home-1.jpg')}
               style={styles.continueImage}
             />
             <View style={styles.continueMeta}>
-              <Text style={styles.progressText}>Đang đọc • 65%</Text>
-              <Text style={styles.continueTitle}>Sapiens</Text>
-              <Text style={styles.continueAuthor}>Yuval Noah Harari</Text>
+              <Text style={styles.progressText}>ĐANG ĐỌC • Ý CHÍNH 1/3</Text>
+              <Text style={styles.continueTitle}>{featuredSummary?.title ?? 'Sapiens'}</Text>
+              <Text style={styles.continueAuthor}>{featuredSummary?.author ?? 'Yuval Noah Harari'}</Text>
               <View style={styles.progressTrack}>
                 <View style={styles.progressFill} />
               </View>
@@ -198,7 +220,7 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
             contentContainerStyle={styles.horizontalRow}
           >
             {TRENDING_BOOKS.map((book) => (
-              <Pressable key={book.id} style={styles.trendingCard}>
+              <Pressable key={book.id} style={styles.trendingCard} onPress={() => openSummary(book.summaryId)}>
                 <Image source={book.image} style={styles.trendingImage} />
                 <Text style={styles.trendingTitle} numberOfLines={1}>
                   {book.title}
@@ -214,14 +236,14 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
           <Text style={styles.sectionHint}>Dựa trên thói quen đọc của bạn</Text>
           <View style={styles.verticalList}>
             {RECOMMENDED_BOOKS.map((book) => (
-              <Pressable key={book.id} style={styles.recommendedCard}>
+              <Pressable key={book.id} style={styles.recommendedCard} onPress={() => openSummary(book.summaryId)}>
                 <Image source={book.image} style={styles.recommendedImage} />
                 <View style={styles.recommendedMeta}>
                   <Text style={styles.recommendedTitle}>{book.title}</Text>
                   <Text style={styles.recommendedAuthor}>{book.author}</Text>
                   <View style={styles.ratingRow}>
                     <MaterialIcons name="star" size={14} color="#AC5D00" />
-                    <Text style={styles.ratingText}>4.8 • 12 phút đọc</Text>
+                    <Text style={styles.ratingText}>4.8 • 12 phút tóm tắt</Text>
                   </View>
                 </View>
               </Pressable>
@@ -282,42 +304,33 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
         <View>
           <Text style={styles.sectionTitle}>Tóm tắt mới</Text>
           <View style={styles.verticalList}>
-            <Pressable style={styles.summaryRow}>
-              <View style={[styles.summaryIcon, styles.summaryIconGold]}>
-                <MaterialIcons name="menu-book" size={19} color="#884800" />
-              </View>
-              <View style={styles.summaryMeta}>
-                <Text style={styles.summaryTitle}>Effortless</Text>
-                <Text style={styles.summaryAuthor}>Greg McKeown</Text>
-              </View>
-              <MaterialIcons name="chevron-right" size={22} color="#787586" />
-            </Pressable>
-            <Pressable style={styles.summaryRow}>
-              <View style={[styles.summaryIcon, styles.summaryIconGreen]}>
-                <MaterialIcons name="psychology" size={19} color={COLORS.secondary} />
-              </View>
-              <View style={styles.summaryMeta}>
-                <Text style={styles.summaryTitle}>Think Again</Text>
-                <Text style={styles.summaryAuthor}>Adam Grant</Text>
-              </View>
-              <MaterialIcons name="chevron-right" size={22} color="#787586" />
-            </Pressable>
-            <Pressable style={styles.summaryRow}>
-              <View style={[styles.summaryIcon, styles.summaryIconPurple]}>
-                <MaterialIcons name="lightbulb-outline" size={19} color={COLORS.primary} />
-              </View>
-              <View style={styles.summaryMeta}>
-                <Text style={styles.summaryTitle}>The Creative Act</Text>
-                <Text style={styles.summaryAuthor}>Rick Rubin</Text>
-              </View>
-              <MaterialIcons name="chevron-right" size={22} color="#787586" />
-            </Pressable>
+            {newSummaries.map((summary, index) => (
+              <Pressable key={summary.id} style={styles.summaryRow} onPress={() => openSummary(summary.id)}>
+                <View
+                  style={[
+                    styles.summaryIcon,
+                    index === 0 ? styles.summaryIconPurple : index === 1 ? styles.summaryIconGreen : styles.summaryIconGold,
+                  ]}
+                >
+                  <MaterialIcons
+                    name={index === 0 ? 'lightbulb-outline' : index === 1 ? 'psychology' : 'menu-book'}
+                    size={19}
+                    color={index === 0 ? COLORS.primary : index === 1 ? COLORS.secondary : '#884800'}
+                  />
+                </View>
+                <View style={styles.summaryMeta}>
+                  <Text style={styles.summaryTitle}>{summary.title}</Text>
+                  <Text style={styles.summaryAuthor}>{summary.author ?? ''}</Text>
+                </View>
+                <MaterialIcons name="chevron-right" size={22} color="#787586" />
+              </Pressable>
+            ))}
           </View>
         </View>
       </ScrollView>
 
       <FloatingAskBar
-        placeholder="Hỏi Bạn Đọc nên học gì tiếp theo"
+        placeholder="Hỏi Bạn Đọc nên đọc gì tiếp theo"
         onOpenFullChat={() => openAskChat()}
         onSubmitPrompt={(prompt) => openAskChat(prompt)}
       />
@@ -327,14 +340,13 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
         onClose={() => setAskModalVisible(false)}
         onOpenFullChat={(prompt) => openAskChat(prompt)}
       />
-    </SafeAreaView>
+    </Screen>
   );
 }
 
 const styles = StyleSheet.create({
-  safeArea: {
-    flex: 1,
-    backgroundColor: COLORS.background,
+  screenContent: {
+    paddingHorizontal: 0,
   },
   header: {
     paddingHorizontal: uiSpacing.xl,

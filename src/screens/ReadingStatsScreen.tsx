@@ -70,7 +70,7 @@ export default function ReadingStatsScreen({ navigation }: ReadingStatsScreenPro
 
         <View style={styles.summaryGrid}>
           <View style={styles.summaryCard}>
-            <View style={[styles.summaryIcon, { backgroundColor: '#5341CD20' }]}>
+            <View style={[styles.summaryIcon, styles.summaryIconPurple]}>
               <MaterialIcons name="schedule" size={20} color="#5341CD" />
             </View>
             <Text style={styles.summaryValue}>245</Text>
@@ -78,7 +78,7 @@ export default function ReadingStatsScreen({ navigation }: ReadingStatsScreenPro
           </View>
 
           <View style={styles.summaryCard}>
-            <View style={[styles.summaryIcon, { backgroundColor: '#006B5520' }]}>
+            <View style={[styles.summaryIcon, styles.summaryIconGreen]}>
               <MaterialIcons name="headphones" size={20} color="#006B55" />
             </View>
             <Text style={styles.summaryValue}>180</Text>
@@ -86,19 +86,19 @@ export default function ReadingStatsScreen({ navigation }: ReadingStatsScreenPro
           </View>
 
           <View style={styles.summaryCard}>
-            <View style={[styles.summaryIcon, { backgroundColor: '#AC5D0020' }]}>
+            <View style={[styles.summaryIcon, styles.summaryIconOrange]}>
               <MaterialIcons name="auto-stories" size={20} color="#AC5D00" />
             </View>
             <Text style={styles.summaryValue}>18</Text>
-            <Text style={styles.summaryLabel}>SÁCH ĐÃ XONG</Text>
+            <Text style={styles.summaryLabel}>TÓM TẮT ĐÃ ĐỌC</Text>
           </View>
 
           <View style={styles.summaryCard}>
-            <View style={[styles.summaryIcon, { backgroundColor: '#6C5CE720' }]}>
+            <View style={[styles.summaryIcon, styles.summaryIconIndigo]}>
               <MaterialIcons name="lightbulb" size={20} color="#6C5CE7" />
             </View>
             <Text style={styles.summaryValue}>42</Text>
-            <Text style={styles.summaryLabel}>INSIGHT HOÀN TẤT</Text>
+            <Text style={styles.summaryLabel}>Ý CHÍNH ĐÃ ĐỌC</Text>
           </View>
         </View>
 
@@ -183,7 +183,7 @@ export default function ReadingStatsScreen({ navigation }: ReadingStatsScreenPro
           </View>
           <Text style={styles.aiTitle}>Tháng này bạn đọc rất tốt!</Text>
           <Text style={styles.aiDesc}>
-            Bạn đã hoàn thành 6 bản tóm tắt trong tháng và duy trì chuỗi 7 ngày. Thời gian học hiệu quả nhất của bạn là buổi tối.
+            Bạn đã đọc 6 bản tóm tắt trong tháng và duy trì chuỗi 7 ngày. Thời gian phù hợp nhất của bạn là buổi tối.
           </Text>
           <Pressable style={styles.aiBtn}>
             <Text style={styles.aiBtnText}>Tiếp tục đọc</Text>
@@ -248,6 +248,10 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
+  summaryIconPurple: { backgroundColor: '#5341CD20' },
+  summaryIconGreen: { backgroundColor: '#006B5520' },
+  summaryIconOrange: { backgroundColor: '#AC5D0020' },
+  summaryIconIndigo: { backgroundColor: '#6C5CE720' },
   summaryValue: { color: '#191C1F', fontSize: 23.33, fontWeight: '800' },
   summaryLabel: { color: '#66657A', fontSize: 11, fontWeight: '600', letterSpacing: 0.4 },
   cardLarge: { backgroundColor: '#FFFFFF', borderRadius: 24, paddingHorizontal: uiSpacing.lg, paddingVertical: 16 },

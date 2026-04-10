@@ -1,0 +1,250 @@
+[
+  {
+    "id": "sapiens",
+    "title": "Sapiens: Lược sử loài người",
+    "author": "Yuval Noah Harari",
+    "categories": ["Lịch sử", "Tư duy"],
+    "durationMinutes": 15,
+    "coverAsset": "assets/book-detail/sapiens-cover.jpg",
+    "overview": "Một hành trình đi qua các bước ngoặt lớn của lịch sử nhân loại: Cách mạng Nhận thức, Nông nghiệp và Khoa học. Tác giả nhấn mạnh sức mạnh của các 'hư cấu tập thể' — những câu chuyện chung giúp con người hợp tác ở quy mô lớn.",
+    "insights": [
+      {
+        "id": "sapiens-i1",
+        "index": 1,
+        "title": "Cuộc cách mạng nhận thức",
+        "body": "Khoảng 70.000 năm trước, Homo sapiens có bước nhảy nhận thức. Con người có thể nói về những thứ không tồn tại vật lý như quốc gia, tiền tệ hay thần linh — mở ra năng lực hợp tác quy mô lớn giữa những người xa lạ.",
+        "quote": "Điều giúp Sapiens thống trị thế giới là khả năng cùng tin vào những hư cấu tập thể.",
+        "tags": ["nhận thức", "hợp tác"],
+        "relatedNodeIds": ["n-sapiens", "c-cognitiveRevolution", "c-collectiveFiction", "t-70000bc"]
+      },
+      {
+        "id": "sapiens-i2",
+        "index": 2,
+        "title": "Hư cấu tập thể tạo ra trật tự",
+        "body": "Những cấu trúc xã hội như pháp luật, doanh nghiệp, tiền tệ tồn tại vì nhiều người cùng tin và hành xử theo chúng. Khi câu chuyện thay đổi, trật tự cũng thay đổi.",
+        "tags": ["xã hội", "niềm tin"],
+        "relatedNodeIds": ["c-collectiveFiction"]
+      },
+      {
+        "id": "sapiens-i3",
+        "index": 3,
+        "title": "Cái giá của Cách mạng Nông nghiệp",
+        "body": "Nông nghiệp giúp tăng dân số nhưng không chắc làm đời sống hạnh phúc hơn. Con người đổi tự do lấy sự ổn định, và làm việc nhiều hơn để nuôi hệ thống.",
+        "tags": ["nông nghiệp", "tiến hóa"],
+        "relatedNodeIds": ["e-agriculturalRevolution"]
+      }
+    ],
+    "graph": {
+      "nodes": [
+        {
+          "id": "n-sapiens",
+          "type": "concept",
+          "label": "Homo sapiens",
+          "description": "Loài người có khả năng tạo và cùng tin vào câu chuyện chung, từ đó hợp tác quy mô lớn.",
+          "imageAsset": "assets/book-detail/sapiens-mini.jpg"
+        },
+        {
+          "id": "c-cognitiveRevolution",
+          "type": "event",
+          "label": "Cách mạng nhận thức",
+          "description": "Bước nhảy về ngôn ngữ và trí tưởng tượng, mở ra khả năng hợp tác qua hư cấu tập thể."
+        },
+        {
+          "id": "c-collectiveFiction",
+          "type": "concept",
+          "label": "Hư cấu tập thể",
+          "description": "Những thứ tồn tại vì nhiều người cùng tin: tiền, quốc gia, luật pháp, tôn giáo."
+        },
+        {
+          "id": "e-agriculturalRevolution",
+          "type": "event",
+          "label": "Cách mạng nông nghiệp",
+          "description": "Chuyển sang canh tác; tăng dân số nhưng ràng buộc cuộc sống và tạo bất bình đẳng."
+        },
+        {
+          "id": "t-70000bc",
+          "type": "time",
+          "label": "70.000 năm trước",
+          "description": "Mốc thường gắn với Cách mạng Nhận thức."
+        }
+      ],
+      "edges": [
+        { "from": "c-cognitiveRevolution", "to": "n-sapiens", "relationLabel": "kích hoạt" },
+        { "from": "c-collectiveFiction", "to": "n-sapiens", "relationLabel": "cho phép" },
+        { "from": "t-70000bc", "to": "c-cognitiveRevolution", "relationLabel": "mốc" },
+        { "from": "e-agriculturalRevolution", "to": "n-sapiens", "relationLabel": "tác động" }
+      ]
+    }
+  },
+  {
+    "id": "deep-work",
+    "title": "Làm việc sâu",
+    "author": "Cal Newport",
+    "categories": ["Năng suất", "Tập trung"],
+    "durationMinutes": 12,
+    "coverAsset": "assets/home/home-4.jpg",
+    "overview": "Làm việc sâu là khả năng tập trung không xao nhãng vào nhiệm vụ đòi hỏi nhận thức cao. Cuốn sách đưa ra lý do vì sao làm việc sâu hiếm nhưng giá trị, và các chiến lược để xây thói quen tập trung.",
+    "insights": [
+      {
+        "id": "deep-work-i1",
+        "index": 1,
+        "title": "Làm việc sâu là kỹ năng siêu lợi thế",
+        "body": "Trong nền kinh tế tri thức, ai bắt nhịp nhanh và tạo ra giá trị cao sẽ thắng. Làm việc sâu giúp bạn đạt cả hai.",
+        "tags": ["kỹ năng", "sự nghiệp"]
+      },
+      {
+        "id": "deep-work-i2",
+        "index": 2,
+        "title": "Xây ritual để giảm ma sát",
+        "body": "Thay vì chờ 'cảm hứng', hãy cố định thời gian/địa điểm/cách bắt đầu để não tự vào trạng thái tập trung.",
+        "tags": ["thói quen", "ritual"]
+      }
+    ],
+    "graph": {
+      "nodes": [
+        {
+          "id": "c-deepWork",
+          "type": "concept",
+          "label": "Làm việc sâu",
+          "description": "Tập trung không xao nhãng vào công việc khó."
+        },
+        {
+          "id": "c-shallowWork",
+          "type": "concept",
+          "label": "Làm việc nông",
+          "description": "Nhiệm vụ dễ bị gián đoạn, ít tạo giá trị (email, họp vụn...)."
+        },
+        {
+          "id": "c-ritual",
+          "type": "concept",
+          "label": "Ritual",
+          "description": "Nghi thức bắt đầu để vào trạng thái tập trung."
+        }
+      ],
+      "edges": [
+        { "from": "c-deepWork", "to": "c-shallowWork", "relationLabel": "đối lập" },
+        { "from": "c-ritual", "to": "c-deepWork", "relationLabel": "kích hoạt" }
+      ]
+    }
+  }
+  ,
+  {
+    "id": "innsmouth",
+    "title": "The Shadow over Innsmouth",
+    "author": "H. P. Lovecraft",
+    "categories": ["Kinh dị", "Hư cấu"],
+    "durationMinutes": 14,
+    "coverAsset": "assets/translator/project-cover.jpg",
+    "overview": "Một lữ khách ghé qua thị trấn Innsmouth và dần nhận ra những dấu hiệu bất thường: sự im lặng, những gương mặt lạ, và một bí mật cổ xưa được che giấu. Tóm tắt tập trung vào các nút mấu chốt và quan hệ giữa nhân vật–địa điểm–sự kiện để bạn nắm mạch truyện nhanh hơn.",
+    "insights": [
+      {
+        "id": "innsmouth-k1",
+        "index": 1,
+        "title": "Bầu không khí và dấu hiệu bất thường",
+        "body": "Innsmouth gây cảm giác lệch chuẩn ngay từ đầu: người dân né tránh, các chi tiết kiến trúc xuống cấp, và những quy tắc ngầm khiến người ngoài bị quan sát.",
+        "tags": ["bối cảnh", "foreshadow"],
+        "relatedNodeIds": ["ch-robert", "pl-innsmouth", "ev-firstEncounter"]
+      },
+      {
+        "id": "innsmouth-k2",
+        "index": 2,
+        "title": "Thông tin từ nhân chứng",
+        "body": "Nhân vật thu thập lời kể từ một người địa phương, ghép các mảnh thông tin để hiểu nguồn gốc bí mật và lý do thị trấn suy tàn.",
+        "tags": ["manh mối", "nhân chứng"],
+        "relatedNodeIds": ["ch-zadok", "ev-revelation"]
+      },
+      {
+        "id": "innsmouth-k3",
+        "index": 3,
+        "title": "Khủng hoảng và truy đuổi",
+        "body": "Khi bức màn bí mật bị vén lên, mối đe dọa trở nên trực diện. Nhân vật chính phải chọn giữa chạy trốn và đối mặt với sự thật.",
+        "tags": ["cao trào", "nguy hiểm"],
+        "relatedNodeIds": ["ev-chase", "ch-robert"]
+      }
+    ],
+    "graph": {
+      "nodes": [
+        {
+          "id": "ch-robert",
+          "type": "character",
+          "label": "Robert Olmstead",
+          "description": "Một người ngoài cuộc tò mò, tìm hiểu thị trấn Innsmouth và bị cuốn vào bí mật của nó.",
+          "imageAsset": "assets/translator/robert-chat.jpg",
+          "meta": {
+            "role": "Nhân vật chính",
+            "openingLine": "Tôi đến Innsmouth vì tò mò, nhưng mọi thứ ở đây khiến tôi muốn rời đi ngay lập tức."
+          },
+          "chat": [
+            {
+              "question": "Vì sao anh đến Innsmouth?",
+              "reply": "Tôi chỉ nghĩ đó là một điểm dừng trên đường đi. Nhưng những ánh nhìn và sự lảng tránh ở đây khiến tôi buộc phải tìm hiểu."
+            },
+            {
+              "question": "Anh tin Zadok không?",
+              "reply": "Tôi không muốn tin. Nhưng mỗi chi tiết ông ấy nói lại khớp với những thứ tôi thấy. Tôi coi lời ông ấy như bản đồ để sống sót."
+            },
+            {
+              "question": "Anh đang sợ điều gì nhất?",
+              "reply": "Không phải một con người cụ thể. Mà là cảm giác cả thị trấn này cùng che một bí mật, và tôi đã bước quá sâu vào nó."
+            }
+          ]
+        },
+        {
+          "id": "ch-zadok",
+          "type": "character",
+          "label": "Zadok Allen",
+          "description": "Người cung cấp lời kể quan trọng, vừa là nhân chứng vừa là mảnh ghép mở khóa bí mật.",
+          "imageAsset": "assets/translator/zadok.jpg",
+          "meta": { "role": "Nhân chứng" },
+          "chat": [
+            {
+              "question": "Ông đang giấu điều gì?",
+              "reply": "Giấu à? Không. Tôi chỉ… không ai muốn nghe sự thật ở đây cả."
+            }
+          ]
+        },
+        {
+          "id": "ch-clerk",
+          "type": "character",
+          "label": "Người bán hàng",
+          "description": "Một mắt xích nhỏ nhưng phản ánh thái độ của Innsmouth với người lạ.",
+          "imageAsset": "assets/translator/clerk.jpg",
+          "meta": { "role": "Phụ" }
+        },
+        {
+          "id": "pl-innsmouth",
+          "type": "place",
+          "label": "Innsmouth",
+          "description": "Thị trấn ven biển u ám, trung tâm của chuỗi sự kiện.",
+          "meta": { "vibe": "u ám, bí mật" }
+        },
+        {
+          "id": "ev-firstEncounter",
+          "type": "event",
+          "label": "Cuộc chạm trán đầu tiên",
+          "description": "Khoảnh khắc nhân vật chính nhận ra Innsmouth có điều bất thường."
+        },
+        {
+          "id": "ev-revelation",
+          "type": "event",
+          "label": "Lời tiết lộ",
+          "description": "Lời kể của nhân chứng giúp ghép mảnh bí mật."
+        },
+        {
+          "id": "ev-chase",
+          "type": "event",
+          "label": "Truy đuổi trong đêm",
+          "description": "Cao trào khi mối đe dọa trở nên trực diện."
+        }
+      ],
+      "edges": [
+        { "from": "ch-zadok", "to": "ch-robert", "relationLabel": "tiết lộ" },
+        { "from": "pl-innsmouth", "to": "ch-robert", "relationLabel": "giam giữ" },
+        { "from": "ev-firstEncounter", "to": "ch-robert", "relationLabel": "kích hoạt" },
+        { "from": "ev-revelation", "to": "ch-zadok", "relationLabel": "liên quan" },
+        { "from": "ev-chase", "to": "ch-robert", "relationLabel": "đe doạ" }
+      ]
+    }
+  }
+]
+

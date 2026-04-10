@@ -7,14 +7,15 @@ import {
   Text,
   View,
 } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
 import { RouteProp } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import BottomNavBar from '../components/BottomNavBar';
 import FloatingAskBar from '../components/FloatingAskBar';
+import { Screen, SectionHeader, TopBar } from '../components/ui';
 import { RootStackParamList } from '../navigation/AppNavigator';
-import { uiColors, uiSpacing } from '../theme/ui';
+import { uiSpacing } from '../theme/ui';
+import { buildChatContext, listSummaries, listSummariesByAuthor, resolveSummaryCoverSource } from '../data';
 
 type AuthorDetailRouteProp = RouteProp<RootStackParamList, 'AuthorDetail'>;
 type AuthorDetailNavigationProp = StackNavigationProp<RootStackParamList, 'AuthorDetail'>;
@@ -23,27 +24,6 @@ type AuthorDetailScreenProps = {
   route: AuthorDetailRouteProp;
   navigation: AuthorDetailNavigationProp;
 };
-
-const BOOKS = [
-  {
-    id: 'book-1',
-    title: 'Sapiens: Lược sử loài người',
-    description: 'Khám phá lịch sử nhân loại từ thời kỳ đồ đá đến hiện đại.',
-    image: require('../assets/author/author-book-1.jpg'),
-  },
-  {
-    id: 'book-2',
-    title: 'Homo Deus: Lược sử tương lai',
-    description: 'Bàn về tương lai của con người và cuộc đua với công nghệ.',
-    image: require('../assets/author/author-book-2.jpg'),
-  },
-  {
-    id: 'book-3',
-    title: '21 bài học cho thế kỷ 21',
-    description: 'Giải đáp các câu hỏi quan trọng nhất của thời đại mới.',
-    image: require('../assets/author/author-book-3.jpg'),
-  },
-];
 
 const RELATED_AUTHORS = [
   { id: 'ra-1', name: 'Daniel Kahneman', image: require('../assets/author/related-author-1.jpg') },
@@ -54,28 +34,34 @@ const RELATED_AUTHORS = [
 
 export default function AuthorDetailScreen({ route, navigation }: AuthorDetailScreenProps) {
   const authorName = route.params?.authorName ?? 'Yuval Noah Harari';
+  const summaries = React.useMemo(() => {
+    const byAuthor = listSummariesByAuthor(authorName);
+    return byAuthor;
+  }, [authorName]);
+  const fallbackSummaries = React.useMemo(() => listSummaries().slice(0, 3), []);
 
   const openAskChat = React.useCallback(
     (initialPrompt?: string) => {
-      navigation.navigate('AskAI', { initialPrompt });
+      const context = buildChatContext({
+        source: 'explore',
+        extraText: `Ngữ cảnh: Tác giả "${authorName}".`,
+      });
+      navigation.navigate('AskAI', { initialPrompt, context });
     },
-    [navigation]
+    [authorName, navigation]
   );
 
   return (
-    <SafeAreaView edges={['top']} style={styles.safeArea}>
-      <View style={styles.topBar}>
-        <View style={styles.topLeft}>
-          <Pressable style={styles.iconBtn} onPress={() => navigation.goBack()}>
-            <MaterialIcons name="arrow-back" size={22} color="#64748B" />
+    <Screen mode="static" edges={['top']} contentStyle={styles.screenContent}>
+      <TopBar
+        title="Chi tiết tác giả"
+        onBack={() => navigation.goBack()}
+        right={
+          <Pressable style={styles.iconBtn}>
+            <MaterialIcons name="share" size={21} color="#64748B" />
           </Pressable>
-          <Text style={styles.topTitle}>Chi tiết tác giả</Text>
-        </View>
-        <Pressable style={styles.iconBtn}>
-          <MaterialIcons name="share" size={21} color="#64748B" />
-        </Pressable>
-      </View>
-
+        }
+      />
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.content}>
         <View style={styles.authorHeader}>
           <View style={styles.heroWrap}>
@@ -86,7 +72,7 @@ export default function AuthorDetailScreen({ route, navigation }: AuthorDetailSc
         </View>
 
         <View style={styles.bioCard}>
-          <Text style={styles.bioText}>
+          <Text style={styles.bioText} numberOfLines={4} ellipsizeMode="tail">
             Yuval Noah Harari là sử gia, triết gia và là tác giả của các đầu sách nổi tiếng như
             Sapiens, Homo Deus và 21 bài học cho thế kỷ 21.
           </Text>
@@ -101,36 +87,78 @@ export default function AuthorDetailScreen({ route, navigation }: AuthorDetailSc
         </View>
 
         <View>
-          <Text style={styles.sectionTitle}>Sách của {authorName}</Text>
-          <View style={styles.bookList}>
-            {BOOKS.map((book) => (
-              <Pressable
-                key={book.id}
-                style={styles.bookCard}
-                onPress={() => navigation.navigate('BookDetail', { title: book.title, author: authorName })}
-              >
-                <Image source={book.image} style={styles.bookCover} />
-                <View style={styles.bookMeta}>
-                  <Text style={styles.bookTitle}>{book.title}</Text>
-                  <Text style={styles.bookDesc}>{book.description}</Text>
-                  <View style={styles.viewBookBtn}>
-                    <Text style={styles.viewBookText}>Xem sách</Text>
-                    <MaterialIcons name="chevron-right" size={16} color="#5341CD" />
+          <Text style={styles.sectionTitle}>Tóm tắt của {authorName}</Text>
+          {summaries.length === 0 ? (
+            <View style={styles.emptyCard}>
+              <Text style={styles.emptyTitle}>Chưa có tóm tắt cho tác giả này</Text>
+              <Text style={styles.emptyText} numberOfLines={3} ellipsizeMode="tail">
+                Bạn có thể xem các tóm tắt gợi ý bên dưới hoặc tìm một tác giả khác.
+              </Text>
+              <View style={styles.bookList}>
+                {fallbackSummaries.map((summary) => (
+                  <Pressable
+                    key={summary.id}
+                    style={styles.bookCard}
+                    onPress={() => navigation.navigate('BookDetail', { summaryId: summary.id })}
+                  >
+                    <Image
+                      source={resolveSummaryCoverSource(summary.id) ?? require('../assets/library/continue-reading.jpg')}
+                      style={styles.bookCover}
+                    />
+                    <View style={styles.bookMeta}>
+                      <Text style={styles.bookTitle} numberOfLines={2} ellipsizeMode="tail">
+                        {summary.title}
+                      </Text>
+                      <Text style={styles.bookDesc} numberOfLines={3} ellipsizeMode="tail">
+                        {summary.overview}
+                      </Text>
+                      <View style={styles.viewBookBtn}>
+                        <Text style={styles.viewBookText}>Xem tóm tắt</Text>
+                        <MaterialIcons name="chevron-right" size={16} color="#5341CD" />
+                      </View>
+                    </View>
+                  </Pressable>
+                ))}
+              </View>
+            </View>
+          ) : (
+            <View style={styles.bookList}>
+              {summaries.map((summary) => (
+                <Pressable
+                  key={summary.id}
+                  style={styles.bookCard}
+                  onPress={() => navigation.navigate('BookDetail', { summaryId: summary.id })}
+                >
+                  <Image
+                    source={resolveSummaryCoverSource(summary.id) ?? require('../assets/library/continue-reading.jpg')}
+                    style={styles.bookCover}
+                  />
+                  <View style={styles.bookMeta}>
+                    <Text style={styles.bookTitle} numberOfLines={2} ellipsizeMode="tail">
+                      {summary.title}
+                    </Text>
+                    <Text style={styles.bookDesc} numberOfLines={3} ellipsizeMode="tail">
+                      {summary.overview}
+                    </Text>
+                    <View style={styles.viewBookBtn}>
+                      <Text style={styles.viewBookText}>Xem tóm tắt</Text>
+                      <MaterialIcons name="chevron-right" size={16} color="#5341CD" />
+                    </View>
                   </View>
-                </View>
-              </Pressable>
-            ))}
-          </View>
+                </Pressable>
+              ))}
+            </View>
+          )}
         </View>
 
         <View>
-          <Text style={styles.sectionTitle}>Tác giả liên quan</Text>
+          <SectionHeader title="Tác giả liên quan" />
           <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.relatedRow}>
             {RELATED_AUTHORS.map((item) => (
-              <View key={item.id} style={styles.relatedItem}>
+              <Pressable key={item.id} style={styles.relatedItem} onPress={() => navigation.push('AuthorDetail', { authorName: item.name })}>
                 <Image source={item.image} style={styles.relatedAvatar} />
                 <Text style={styles.relatedName}>{item.name}</Text>
-              </View>
+              </Pressable>
             ))}
           </ScrollView>
         </View>
@@ -142,26 +170,13 @@ export default function AuthorDetailScreen({ route, navigation }: AuthorDetailSc
         onSubmitPrompt={(prompt) => openAskChat(prompt)}
       />
       <BottomNavBar activeTab="search" />
-    </SafeAreaView>
+    </Screen>
   );
 }
 
 const styles = StyleSheet.create({
-  safeArea: {
-    flex: 1,
-    backgroundColor: uiColors.background,
-  },
-  topBar: {
-    height: 58,
-    paddingHorizontal: uiSpacing.lg,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-  },
-  topLeft: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 10,
+  screenContent: {
+    paddingHorizontal: 0,
   },
   iconBtn: {
     width: 34,
@@ -169,11 +184,6 @@ const styles = StyleSheet.create({
     borderRadius: 99,
     alignItems: 'center',
     justifyContent: 'center',
-  },
-  topTitle: {
-    fontSize: 24,
-    fontWeight: '700',
-    color: '#191C1F',
   },
   content: {
     paddingHorizontal: uiSpacing.lg,
@@ -311,6 +321,25 @@ const styles = StyleSheet.create({
     fontSize: 12,
     lineHeight: 16,
     color: '#191C1F',
+    fontWeight: '500',
+  },
+  emptyCard: {
+    borderRadius: 18,
+    backgroundColor: '#FFFFFF',
+    padding: 14,
+    borderWidth: 1,
+    borderColor: '#E3E8EF',
+  },
+  emptyTitle: {
+    color: '#191C1F',
+    fontSize: 16,
+    fontWeight: '800',
+  },
+  emptyText: {
+    marginTop: 6,
+    color: '#787586',
+    fontSize: 13,
+    lineHeight: 19,
     fontWeight: '500',
   },
 });

@@ -30,10 +30,12 @@ import TopicDetailScreen from '../screens/TopicDetailScreen';
 import AuthorDetailScreen from '../screens/AuthorDetailScreen';
 import BookDetailScreen from '../screens/BookDetailScreen';
 import AskAIScreen from '../screens/AskAIScreen';
+import CharacterChatScreen from '../screens/CharacterChatScreen';
 import OnboardingScreen from '../screens/OnboardingScreen';
 import LoginScreen from '../screens/LoginScreen';
 import SignUpScreen from '../screens/SignUpScreen';
 import { uiColors } from '../theme/ui';
+import type { ChatContext } from '../types/content';
 
 const ONBOARDING_DONE_KEY = 'app.onboarding.completed';
 
@@ -61,6 +63,8 @@ export type RootStackParamList = {
   UploadManagement: undefined;
   Notifications: undefined;
   InsightDetail: {
+    summaryId?: string;
+    insightId?: string;
     bookTitle?: string;
     author?: string;
     genre?: string;
@@ -82,11 +86,15 @@ export type RootStackParamList = {
     authorName: string;
   };
   BookDetail: {
-    title: string;
-    author?: string;
+    summaryId: string;
+  };
+  CharacterChat: {
+    summaryId: string;
+    nodeId: string;
   };
   AskAI: {
     initialPrompt?: string;
+    context?: ChatContext;
   };
 };
 
@@ -105,7 +113,7 @@ export default function AppNavigator() {
       }
     };
 
-    void loadOnboardingState();
+    loadOnboardingState().catch(() => setHasCompletedOnboarding(false));
   }, []);
 
   const initialRoute = useMemo<keyof RootStackParamList>(() => {
@@ -129,7 +137,6 @@ export default function AppNavigator() {
       key={initialRoute}
       initialRouteName={initialRoute}
       screenOptions={{
-        animationEnabled: true,
         gestureEnabled: true,
         cardStyleInterpolator: CardStyleInterpolators.forHorizontalIOS,
       }}
@@ -277,6 +284,11 @@ export default function AppNavigator() {
       <Stack.Screen
         name="BookDetail"
         component={BookDetailScreen}
+        options={{ headerShown: false }}
+      />
+      <Stack.Screen
+        name="CharacterChat"
+        component={CharacterChatScreen}
         options={{ headerShown: false }}
       />
       <Stack.Screen
