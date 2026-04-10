@@ -1,4 +1,23 @@
 {
   "name": "BanDoc",
-  "displayName": "BanDoc"
+  "displayName": "BanDoc",
+  "expo": {
+    "name": "BanDoc",
+    "slug": "bandoc-production",
+    "version": "0.0.1",
+    "scheme": "bandoc",
+    "ios": {
+      "bundleIdentifier": "vn.bandoc.app",
+      "buildNumber": "1"
+    },
+    "android": {
+      "package": "vn.bandoc.app",
+      "versionCode": 1
+    },
+    "extra": {
+      "eas": {
+        "projectId": "d1918c7b-7790-4e58-ba20-fce7d9bfeeb5"
+      }
+    }
+  }
 }

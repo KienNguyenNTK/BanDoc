@@ -9,7 +9,9 @@
     "start": "react-native start",
     "test": "jest",
     "apk": "node scripts/build-apk.js",
-    "fonts:link": "react-native-asset"
+    "fonts:link": "react-native-asset",
+    "eas:build:ios": "eas build -p ios --profile production",
+    "eas:submit:ios": "eas submit -p ios --profile production"
   },
   "dependencies": {
     "@gorhom/bottom-sheet": "^5.2.8",
