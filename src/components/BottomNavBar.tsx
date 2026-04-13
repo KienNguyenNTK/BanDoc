@@ -11,7 +11,8 @@ import { buildChatContext } from '../data';
 type BottomTab = 'home' | 'search' | 'ai' | 'library' | 'profile';
 
 type BottomNavBarProps = {
-  activeTab?: BottomTab;
+  /** Bỏ qua hoặc `undefined`: coi như `'home'`. `null`: không tab nào active (vd. màn chi tiết). */
+  activeTab?: BottomTab | null;
 };
 
 const COLORS = {
@@ -27,13 +28,14 @@ const ITEMS: Array<{ key: BottomTab; label: string; icon: string }> = [
   { key: 'profile', label: 'Cá nhân', icon: 'person' },
 ];
 
-export default function BottomNavBar({ activeTab = 'home' }: BottomNavBarProps) {
+export default function BottomNavBar({ activeTab }: BottomNavBarProps) {
   const navigation = useNavigation<StackNavigationProp<RootStackParamList>>();
   const insets = useSafeAreaInsets();
   const bottomInset = Math.max(insets.bottom, 6);
+  const resolvedActive: BottomTab | null = activeTab === undefined ? 'home' : activeTab;
 
   const handlePress = (tab: BottomTab) => {
-    if (tab === activeTab) {
+    if (resolvedActive !== null && tab === resolvedActive) {
       return;
     }
 
@@ -49,11 +51,11 @@ export default function BottomNavBar({ activeTab = 'home' }: BottomNavBarProps) 
 
     if (tab === 'ai') {
       const source =
-        activeTab === 'search'
+        resolvedActive === 'search'
           ? 'explore'
-          : activeTab === 'library'
+          : resolvedActive === 'library'
             ? 'library'
-            : activeTab === 'profile'
+            : resolvedActive === 'profile'
               ? 'home'
               : 'home';
       const context = buildChatContext({
@@ -85,7 +87,7 @@ export default function BottomNavBar({ activeTab = 'home' }: BottomNavBarProps) 
       ]}
     >
       {ITEMS.map((item) => {
-        const active = item.key === activeTab;
+        const active = resolvedActive !== null && item.key === resolvedActive;
 
         return (
           <Pressable key={item.key} style={styles.navItem} onPress={() => handlePress(item.key)}>

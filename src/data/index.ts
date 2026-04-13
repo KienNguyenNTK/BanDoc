@@ -50,6 +50,14 @@ export function resolveSummaryCoverSource(summaryId: string): ImageSourcePropTyp
       return require('../assets/home/home-4.jpg');
     case 'innsmouth':
       return require('../assets/translator/project-cover.jpg');
+    case 'atomic-habits':
+      return require('../assets/home/home-2.jpg');
+    case 'the-alchemist':
+      return require('../assets/home/home-3.jpg');
+    case 'focus':
+      return require('../assets/home/home-5.jpg');
+    case 'five-am-club':
+      return require('../assets/home/home-6.jpg');
     default:
       return undefined;
   }

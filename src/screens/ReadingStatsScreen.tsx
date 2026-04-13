@@ -185,7 +185,7 @@ export default function ReadingStatsScreen({ navigation }: ReadingStatsScreenPro
           <Text style={styles.aiDesc}>
             Bạn đã đọc 6 bản tóm tắt trong tháng và duy trì chuỗi 7 ngày. Thời gian phù hợp nhất của bạn là buổi tối.
           </Text>
-          <Pressable style={styles.aiBtn}>
+          <Pressable style={styles.aiBtn} onPress={() => navigation.navigate('Library')}>
             <Text style={styles.aiBtnText}>Tiếp tục đọc</Text>
           </Pressable>
         </View>

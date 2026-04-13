@@ -9,12 +9,13 @@ import {
 } from 'react-native';
 import { RouteProp } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import BottomNavBar from '../components/BottomNavBar';
 import FloatingAskBar from '../components/FloatingAskBar';
 import { Screen, SectionHeader, TopBar } from '../components/ui';
 import { RootStackParamList } from '../navigation/AppNavigator';
-import { uiColors, uiSpacing } from '../theme/ui';
+import { uiColors, uiSizing, uiSpacing } from '../theme/ui';
 import { buildChatContext, listSummariesByCategory, resolveSummaryCoverSource } from '../data';
 
 type TopicDetailRouteProp = RouteProp<RootStackParamList, 'TopicDetail'>;
@@ -29,6 +30,11 @@ const CONCEPTS = ['Nhận thức', 'Thiên kiến', 'Hành vi', 'Trí nhớ', '�
 const RELATED_TOPICS = ['Triết học', 'Năng suất', 'Kinh tế học hành vi'];
 
 export default function TopicDetailScreen({ route, navigation }: TopicDetailScreenProps) {
+  const insets = useSafeAreaInsets();
+  const bottomInset = Math.max(insets.bottom, 6);
+  const scrollBottomPad =
+    uiSizing.bottomNavHeight + bottomInset + uiSizing.floatingAskHeight + uiSpacing.xl + uiSpacing.md;
+
   const topicTitle = route.params?.title ?? 'Tâm lý học';
   const topicDescription =
     route.params?.description ?? 'Hiểu về hành vi, trí nhớ và cách con người ra quyết định';
@@ -58,7 +64,10 @@ export default function TopicDetailScreen({ route, navigation }: TopicDetailScre
         }
       />
 
-      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.content}>
+      <ScrollView
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={[styles.content, { paddingBottom: scrollBottomPad }]}
+      >
         <View style={styles.headerSection}>
           <View style={styles.topicIconWrap}>
             <MaterialIcons name="psychology" size={30} color="#6C5CE7" />
@@ -78,11 +87,17 @@ export default function TopicDetailScreen({ route, navigation }: TopicDetailScre
           <SectionHeader title="Khái niệm chính" />
           <View style={styles.chipWrap}>
             {CONCEPTS.map((concept, index) => (
-              <View key={concept} style={styles.conceptChip}>
+              <Pressable
+                key={concept}
+                style={styles.conceptChip}
+                onPress={() =>
+                  openAskChat(`Giải thích khái niệm "${concept}" trong chủ đề ${topicTitle}.`)
+                }
+              >
                 <Text style={[styles.conceptText, index < 2 ? styles.conceptTextPrimary : undefined]}>
                   {concept}
                 </Text>
-              </View>
+              </Pressable>
             ))}
           </View>
         </View>
@@ -170,7 +185,6 @@ const styles = StyleSheet.create({
   content: {
     paddingHorizontal: uiSpacing.lg,
     paddingTop: 18,
-    paddingBottom: 150,
     gap: 20,
   },
   headerSection: {

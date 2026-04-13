@@ -15,6 +15,7 @@ import FloatingAskBar from '../components/FloatingAskBar';
 import { Screen, TopBar } from '../components/ui';
 import { RootStackParamList } from '../navigation/AppNavigator';
 import { uiColors, uiSpacing, uiTypography } from '../theme/ui';
+import { DISCOVERY_NEUTRAL_PROMPT } from '../constants/aiDiscoveryPrompts';
 import { buildChatContext, listSummariesByCategory, listCategories, resolveSummaryCoverSource, searchSummaries } from '../data';
 
 type SearchScreenNavigationProp = StackNavigationProp<RootStackParamList, 'Search'>;
@@ -123,18 +124,18 @@ export default function SearchScreen({ navigation }: SearchScreenProps) {
         </View>
 
         <View style={styles.aiCard}>
-          <View style={styles.aiHeaderRow}>
+          <Pressable style={styles.aiHeaderRow} onPress={() => openAskChat(DISCOVERY_NEUTRAL_PROMPT)}>
             <View style={styles.aiIconWrap}>
               <MaterialIcons name="auto-awesome" size={18} color="#6C5CE7" />
             </View>
             <Text style={styles.aiTitle}>Hôm nay bạn muốn khám phá gì?</Text>
-          </View>
+          </Pressable>
           <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.aiPromptRow}>
             <Pressable style={styles.aiPromptChip} onPress={() => openAskChat('Tôi nên đọc gì tiếp theo?')}>
               <Text style={styles.aiPromptText}>Tôi nên đọc gì tiếp theo?</Text>
             </Pressable>
-            <Pressable style={styles.aiPromptChip} onPress={() => openAskChat('Gợi ý tóm tắt 10 phút')}>
-              <Text style={styles.aiPromptText}>Gợi ý tóm tắt 10 phút</Text>
+            <Pressable style={styles.aiPromptChip} onPress={() => openAskChat('Gợi ý tóm tắt trong 10 phút')}>
+              <Text style={styles.aiPromptText}>Gợi ý tóm tắt trong 10 phút</Text>
             </Pressable>
             <Pressable style={styles.aiPromptChip} onPress={() => openAskChat('Gợi ý tóm tắt về sự tập trung')}>
               <Text style={styles.aiPromptText}>Tóm tắt về sự tập trung</Text>

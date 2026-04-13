@@ -9,7 +9,7 @@ import {
   Text,
   View,
 } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { RouteProp } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
@@ -21,6 +21,7 @@ import Animated, {
   useSharedValue,
   withTiming,
 } from 'react-native-reanimated';
+import BottomNavBar from '../components/BottomNavBar';
 import FloatingAskBar from '../components/FloatingAskBar';
 import SegmentedTabs from '../components/SegmentedTabs';
 import { RootStackParamList } from '../navigation/AppNavigator';
@@ -171,6 +172,11 @@ const pointOnCircle = (origin: GraphPoint, target: GraphPoint, radius: number): 
 };
 
 export default function BookDetailScreen({ route, navigation }: BookDetailScreenProps) {
+  const insets = useSafeAreaInsets();
+  const bottomInset = Math.max(insets.bottom, 6);
+  const scrollBottomPad =
+    uiSizing.bottomNavHeight + bottomInset + uiSizing.floatingAskHeight + uiSpacing.lg + uiSpacing.sm;
+
   const [activeTab, setActiveTab] = React.useState<BookTab>('summary');
   const [activeInsightIndex, setActiveInsightIndex] = React.useState(0);
   const [selectedNodeId, setSelectedNodeId] = React.useState<string | null>(null);
@@ -206,6 +212,10 @@ export default function BookDetailScreen({ route, navigation }: BookDetailScreen
     if (summaryId === 'sapiens') return require('../assets/book-detail/sapiens-cover.jpg');
     if (summaryId === 'deep-work') return require('../assets/home/home-4.jpg');
     if (summaryId === 'innsmouth') return require('../assets/translator/project-cover.jpg');
+    if (summaryId === 'atomic-habits') return require('../assets/home/home-2.jpg');
+    if (summaryId === 'the-alchemist') return require('../assets/home/home-3.jpg');
+    if (summaryId === 'focus') return require('../assets/home/home-5.jpg');
+    if (summaryId === 'five-am-club') return require('../assets/home/home-6.jpg');
     return require('../assets/library/continue-reading.jpg');
   }, [summaryId]);
 
@@ -353,7 +363,10 @@ export default function BookDetailScreen({ route, navigation }: BookDetailScreen
         </Pressable>
       </View>
 
-      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.content}>
+      <ScrollView
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={[styles.content, { paddingBottom: scrollBottomPad }]}
+      >
         <View style={styles.headerSection}>
           <View style={styles.coverFrame}>
             <Image source={coverSource} style={styles.cover} resizeMode="cover" />
@@ -569,7 +582,7 @@ export default function BookDetailScreen({ route, navigation }: BookDetailScreen
                     ? require('../assets/book-detail/sapiens-mini.jpg')
                     : summaryId === 'innsmouth'
                       ? require('../assets/translator/robert-chat.jpg')
-                    : require('../assets/library/continue-reading.jpg')
+                      : coverSource
                 }
                 style={styles.bookEntityImage}
               />
@@ -611,10 +624,10 @@ export default function BookDetailScreen({ route, navigation }: BookDetailScreen
 
       <FloatingAskBar
         placeholder={activeTab === 'graph' ? 'Hỏi sơ đồ về mối liên hệ này...' : 'Hỏi Bạn Đọc về bản tóm tắt này...'}
-        bottomOffset={16}
         onOpenFullChat={() => openAskChat()}
         onSubmitPrompt={(prompt) => openAskChat(prompt)}
       />
+      <BottomNavBar activeTab={null} />
     </SafeAreaView>
   );
 }
@@ -630,7 +643,7 @@ const styles = StyleSheet.create({
   },
   iconBtn: { width: 34, height: 34, borderRadius: 99, alignItems: 'center', justifyContent: 'center' },
   topTitle: { fontSize: uiTypography.h2, color: uiColors.text, fontWeight: '600' },
-  content: { paddingHorizontal: uiSpacing.lg, paddingBottom: 150, gap: uiSpacing.lg },
+  content: { paddingHorizontal: uiSpacing.lg, gap: uiSpacing.lg },
   headerSection: { alignItems: 'center', gap: 8 },
   coverFrame: {
     borderRadius: 18,

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import {
   Image,
   ImageBackground,
@@ -14,9 +14,9 @@ import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import { RootStackParamList } from '../navigation/AppNavigator';
 import BottomNavBar from '../components/BottomNavBar';
 import FloatingAskBar from '../components/FloatingAskBar';
-import AskAIBottomSheet from '../components/AskAIBottomSheet';
 import { Screen } from '../components/ui';
 import { uiColors, uiSpacing, uiTypography } from '../theme/ui';
+import { DISCOVERY_NEUTRAL_PROMPT } from '../constants/aiDiscoveryPrompts';
 import { buildChatContext, getSummaryById, listSummaries } from '../data';
 import type { BookSummary } from '../types/content';
 
@@ -54,14 +54,14 @@ const COLORS = {
 const TRENDING_BOOKS: BookCard[] = [
   {
     id: 'trending-1',
-    summaryId: 'sapiens',
+    summaryId: 'atomic-habits',
     title: 'Thói quen nguyên tử',
     author: 'James Clear',
     image: require('../assets/home/home-2.jpg'),
   },
   {
     id: 'trending-2',
-    summaryId: 'deep-work',
+    summaryId: 'the-alchemist',
     title: 'Nhà giả kim',
     author: 'Paulo Coelho',
     image: require('../assets/home/home-3.jpg'),
@@ -78,14 +78,14 @@ const TRENDING_BOOKS: BookCard[] = [
 const RECOMMENDED_BOOKS: BookCard[] = [
   {
     id: 'rec-1',
-    summaryId: 'sapiens',
+    summaryId: 'focus',
     title: 'Tập trung',
     author: 'Daniel Goleman',
     image: require('../assets/home/home-5.jpg'),
   },
   {
     id: 'rec-2',
-    summaryId: 'deep-work',
+    summaryId: 'five-am-club',
     title: 'Câu lạc bộ 5 giờ sáng',
     author: 'Robin Sharma',
     image: require('../assets/home/home-6.jpg'),
@@ -117,8 +117,6 @@ const TOPICS = [
 ];
 
 export default function HomeScreen({ navigation }: HomeScreenProps) {
-  const [askModalVisible, setAskModalVisible] = useState(false);
-
   const homeContext = React.useMemo(() => {
     const featured = getSummaryById('sapiens');
     return buildChatContext({
@@ -129,7 +127,6 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
   }, []);
 
   const openAskChat = (initialPrompt?: string) => {
-    setAskModalVisible(false);
     navigation.navigate('AskAI', { initialPrompt, context: homeContext });
   };
 
@@ -163,25 +160,28 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
         contentContainerStyle={styles.scrollContent}
       >
         <View style={styles.discoveryCard}>
-          <View style={styles.discoveryTopRow}>
+          <Pressable
+            style={styles.discoveryTopRow}
+            onPress={() => openAskChat(DISCOVERY_NEUTRAL_PROMPT)}
+          >
             <View style={styles.discoveryIconWrap}>
               <MaterialIcons name="auto-awesome" size={18} color={COLORS.primary} />
             </View>
             <Text style={styles.discoveryTitle}>Hôm nay bạn muốn khám phá gì?</Text>
-          </View>
+          </Pressable>
           <ScrollView
             horizontal
             showsHorizontalScrollIndicator={false}
             contentContainerStyle={styles.chipsRow}
           >
-            <Pressable style={styles.chip}>
+            <Pressable style={styles.chip} onPress={() => openAskChat('Tôi nên đọc gì tiếp theo?')}>
               <Text style={styles.chipText}>Tôi nên đọc gì tiếp theo?</Text>
             </Pressable>
-            <Pressable style={styles.chip}>
+            <Pressable style={styles.chip} onPress={() => openAskChat('Gợi ý tóm tắt trong 10 phút')}>
               <Text style={styles.chipText}>Gợi ý tóm tắt trong 10 phút</Text>
             </Pressable>
-            <Pressable style={styles.chip}>
-              <Text style={styles.chipText}>Tóm tắt về tập trung</Text>
+            <Pressable style={styles.chip} onPress={() => openAskChat('Gợi ý tóm tắt về sự tập trung')}>
+              <Text style={styles.chipText}>Tóm tắt về sự tập trung</Text>
             </Pressable>
           </ScrollView>
         </View>
@@ -263,7 +263,11 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
               const active = index === 1;
 
               return (
-                <Pressable key={topic} style={[styles.topicChip, active ? styles.topicChipActive : undefined]}>
+                <Pressable
+                  key={topic}
+                  style={[styles.topicChip, active ? styles.topicChipActive : undefined]}
+                  onPress={() => navigation.navigate('TopicDetail', { title: topic })}
+                >
                   <Text style={[styles.topicChipText, active ? styles.topicChipTextActive : undefined]}>
                     {topic}
                   </Text>
@@ -335,11 +339,6 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
         onSubmitPrompt={(prompt) => openAskChat(prompt)}
       />
       <BottomNavBar activeTab="home" />
-      <AskAIBottomSheet
-        visible={askModalVisible}
-        onClose={() => setAskModalVisible(false)}
-        onOpenFullChat={(prompt) => openAskChat(prompt)}
-      />
     </Screen>
   );
 }

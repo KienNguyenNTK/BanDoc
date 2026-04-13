@@ -18,6 +18,23 @@ import { uiColors, uiSizing, uiSpacing } from '../theme/ui';
 import { listSummaries, resolveSummaryCoverSource } from '../data';
 import type { ChatContext } from '../types/content';
 
+function defaultUserPromptForContext(context: ChatContext | undefined): string {
+  switch (context?.source) {
+    case 'home':
+      return 'Tôi nên đọc gì tiếp theo?';
+    case 'explore':
+      return 'Gợi ý cho tôi tóm tắt hoặc chủ đề phù hợp.';
+    case 'summary':
+      return 'Hãy giúp tôi hiểu sâu hơn về bản tóm tắt này.';
+    case 'graph':
+      return 'Hãy giúp tôi hiểu sơ đồ và các mối liên hệ này.';
+    case 'library':
+      return 'Gợi ý từ thư viện của tôi nên đọc gì tiếp?';
+    default:
+      return 'Bạn có thể gợi ý nội dung cho tôi không?';
+  }
+}
+
 type AskAIScreenRouteProp = RouteProp<RootStackParamList, 'AskAI'>;
 type AskAIScreenNavigationProp = StackNavigationProp<RootStackParamList, 'AskAI'>;
 
@@ -34,8 +51,9 @@ const SUGGESTED_PROMPTS = [
 ];
 
 export default function AskAIScreen({ route, navigation }: AskAIScreenProps) {
-  const userPrompt = route.params?.initialPrompt ?? 'Tôi muốn hiểu thêm về kinh tế học hành vi. Có gợi ý nào không?';
   const context: ChatContext | undefined = route.params?.context;
+  const userPrompt =
+    route.params?.initialPrompt?.trim() || defaultUserPromptForContext(context);
   const [composerText, setComposerText] = React.useState('');
   const insets = useSafeAreaInsets();
   const bottomInset = Math.max(insets.bottom, 6);
@@ -131,7 +149,7 @@ export default function AskAIScreen({ route, navigation }: AskAIScreenProps) {
           contentContainerStyle={styles.suggestionRow}
         >
           {SUGGESTED_PROMPTS.map((prompt) => (
-            <Pressable key={prompt} style={styles.suggestionChip}>
+            <Pressable key={prompt} style={styles.suggestionChip} onPress={() => setComposerText(prompt)}>
               <Text style={styles.suggestionChipText}>{prompt}</Text>
             </Pressable>
           ))}

@@ -245,6 +245,250 @@
         { "from": "ev-chase", "to": "ch-robert", "relationLabel": "đe doạ" }
       ]
     }
+  },
+  {
+    "id": "atomic-habits",
+    "title": "Thói quen nguyên tử",
+    "author": "James Clear",
+    "categories": ["Năng suất", "Tập trung"],
+    "durationMinutes": 12,
+    "coverAsset": "assets/home/home-2.jpg",
+    "overview": "Khung bốn bước (gợi ý, khao khát, phản ứng, thưởng) giúp xây thói quen nhỏ nhưng bền: cải thiện 1% mỗi ngày, chồng chất theo thời gian thay vì chỉ dựa vào ý chí ngắn hạn.",
+    "insights": [
+      {
+        "id": "atomic-habits-i1",
+        "index": 1,
+        "title": "Hệ thống hơn mục tiêu",
+        "body": "Bạn không nâng tạ để có mục tiêu; bạn có mục tiêu để nâng tạ. Tập trung vào danh tính (bạn là kiểu người nào) giúp thói quen bám lâu hơn so với chỉ nhắm một con số.",
+        "tags": ["danh tính", "thói quen"],
+        "relatedNodeIds": ["c-identity", "c-habitLoop"]
+      },
+      {
+        "id": "atomic-habits-i2",
+        "index": 2,
+        "title": "Làm cho thói quen dễ — hoặc khó",
+        "body": "Giảm ma sát cho thói quen tốt (chuẩn bị môi trường) và tăng ma sát cho thói quen xấu; não bộ ưu tiên con đường ít năng lượng nhất.",
+        "tags": ["môi trường", "ma sát"],
+        "relatedNodeIds": ["c-friction", "c-habitLoop"]
+      },
+      {
+        "id": "atomic-habits-i3",
+        "index": 3,
+        "title": "Theo dõi và tái khởi động",
+        "body": "Ghi lại (dù đơn giản) giúp nhìn thấy tiến trình; khi đứt chuỗi, quy tắc không bỏ lỡ hai lần giúp quay lại nhanh hơn là hoàn hảo tuyệt đối.",
+        "tags": ["theo dõi", "kiên trì"],
+        "relatedNodeIds": ["c-habitLoop"]
+      }
+    ],
+    "graph": {
+      "nodes": [
+        {
+          "id": "c-habitLoop",
+          "type": "concept",
+          "label": "Vòng lặp thói quen",
+          "description": "Gợi ý → khao khát → phản ứng → thưởng: nền tảng để thiết kế hành vi."
+        },
+        {
+          "id": "c-identity",
+          "type": "concept",
+          "label": "Danh tính",
+          "description": "Bạn tin mình là ai sẽ kéo theo hành vi lặp lại phù hợp với hình ảnh đó."
+        },
+        {
+          "id": "c-friction",
+          "type": "concept",
+          "label": "Ma sát",
+          "description": "Độ khó của hành động; giảm ma sát cho việc nên làm, tăng cho việc nên tránh."
+        }
+      ],
+      "edges": [
+        { "from": "c-identity", "to": "c-habitLoop", "relationLabel": "định hướng" },
+        { "from": "c-friction", "to": "c-habitLoop", "relationLabel": "điều chỉnh" }
+      ]
+    }
+  },
+  {
+    "id": "the-alchemist",
+    "title": "Nhà giả kim",
+    "author": "Paulo Coelho",
+    "categories": ["Triết học", "Hư cấu"],
+    "durationMinutes": 11,
+    "coverAsset": "assets/home/home-3.jpg",
+    "overview": "Hành trình của chàng chăn cừu Santiago tìm kho báu cá nhân — qua sa mạc, thử thách và những dấu hiệu, cuốn sách nói về lắng nghe trái tim, Personal Legend và ý nghĩa của hành trình hơn đích đến.",
+    "insights": [
+      {
+        "id": "the-alchemist-i1",
+        "index": 1,
+        "title": "Dấu hiệu và ngôn ngữ thế giới",
+        "body": "Vũ trụ conspire (ủng hộ) khi bạn thật sự muốn một điều; các dấu hiệu xuất hiện cho người chú ý, nhưng cần can đảm để diễn giải và hành động.",
+        "tags": ["dấu hiệu", "ý chí"],
+        "relatedNodeIds": ["ch-santiago", "c-personalLegend"]
+      },
+      {
+        "id": "the-alchemist-i2",
+        "index": 2,
+        "title": "Personal Legend",
+        "body": "Mỗi người có một sứ mệnh riêng; trì hoãn vì sợ thất bại hoặc an phận khiến sứ mệnh im lặng nhưng không biến mất.",
+        "tags": ["sứ mệnh", "can đảm"],
+        "relatedNodeIds": ["c-personalLegend"]
+      },
+      {
+        "id": "the-alchemist-i3",
+        "index": 3,
+        "title": "Kho báu ở nơi bắt đầu",
+        "body": "Nhiều lần đi xa chỉ để nhận ra giá trị đã từng gần mình; bài học thường là học cách nhìn lại với con mắt mới.",
+        "tags": ["hành trình", "nhận thức"],
+        "relatedNodeIds": ["ch-santiago", "pl-desert"]
+      }
+    ],
+    "graph": {
+      "nodes": [
+        {
+          "id": "ch-santiago",
+          "type": "character",
+          "label": "Santiago",
+          "description": "Chàng chăn cừu lên đường tìm kho báu và hiểu về ước mơ của chính mình."
+        },
+        {
+          "id": "c-personalLegend",
+          "type": "concept",
+          "label": "Personal Legend",
+          "description": "Con đường mà trái tim và cuộc đời bạn thôi thúc theo đuổi."
+        },
+        {
+          "id": "pl-desert",
+          "type": "place",
+          "label": "Sa mạc",
+          "description": "Không gian thử thách và thanh lọc, nơi dấu hiệu trở nên rõ hơn."
+        }
+      ],
+      "edges": [
+        { "from": "ch-santiago", "to": "c-personalLegend", "relationLabel": "theo đuổi" },
+        { "from": "pl-desert", "to": "ch-santiago", "relationLabel": "thử thách" }
+      ]
+    }
+  },
+  {
+    "id": "focus",
+    "title": "Tập trung",
+    "author": "Daniel Goleman",
+    "categories": ["Tâm lý học", "Tập trung"],
+    "durationMinutes": 12,
+    "coverAsset": "assets/home/home-5.jpg",
+    "overview": "Goleman phân tích chú ý như một năng lực có thể rèn: từ tập trung vào bản thân, vào người khác, và vào bối cảnh rộng — nền tảng của học tập, đồng cảm và ra quyết định.",
+    "insights": [
+      {
+        "id": "focus-i1",
+        "index": 1,
+        "title": "Ba dạng chú ý",
+        "body": "Chú ý hướng nội (cảm xúc, trực giác), hướng ngoại (người khác) và bao quát (hệ thống, xu hướng) — mỗi dạng hỗ trợ một loại năng lực khác nhau.",
+        "tags": ["chú ý", "năng lực"],
+        "relatedNodeIds": ["c-inner", "c-outer"]
+      },
+      {
+        "id": "focus-i2",
+        "index": 2,
+        "title": "Đồng cảm cần chú ý",
+        "body": "Hiểu người khác không chỉ là kỹ năng xã hội mà là khả năng dừng lại và thật sự lắng nghe trước khi phán đoán.",
+        "tags": ["đồng cảm", "lắng nghe"],
+        "relatedNodeIds": ["c-outer"]
+      },
+      {
+        "id": "focus-i3",
+        "index": 3,
+        "title": "Kiệt sức chú ý",
+        "body": "Chú ý là nguồn lực hữu hạn; đa nhiệm và thông báo liên tục làm mỏng lớp điều hướng, cần thiết kế môi trường và nghỉ phục hồi.",
+        "tags": ["phục hồi", "đa nhiệm"],
+        "relatedNodeIds": ["c-inner", "c-outer"]
+      }
+    ],
+    "graph": {
+      "nodes": [
+        {
+          "id": "c-inner",
+          "type": "concept",
+          "label": "Chú ý hướng nội",
+          "description": "Theo dõi trạng thái nội tâm, cảm xúc và tín hiệu trực giác."
+        },
+        {
+          "id": "c-outer",
+          "type": "concept",
+          "label": "Chú ý hướng ngoại",
+          "description": "Lắng nghe và đọc tín hiệu từ người khác, ngữ cảnh xã hội."
+        },
+        {
+          "id": "c-open",
+          "type": "concept",
+          "label": "Chú ý mở",
+          "description": "Nhìn bức tranh lớn, mối liên hệ và xu hướng dài hạn."
+        }
+      ],
+      "edges": [
+        { "from": "c-inner", "to": "c-outer", "relationLabel": "cân bằng" },
+        { "from": "c-outer", "to": "c-open", "relationLabel": "mở rộng" }
+      ]
+    }
+  },
+  {
+    "id": "five-am-club",
+    "title": "Câu lạc bộ 5 giờ sáng",
+    "author": "Robin Sharma",
+    "categories": ["Năng suất", "Thói quen"],
+    "durationMinutes": 12,
+    "coverAsset": "assets/home/home-6.jpg",
+    "overview": "Qua câu chuyện cố vấn và hai nhân vật đang bế tắc, Sharma trình bày lối sống dậy sớm, bảo vệ buổi sáng cho học hỏi, vận động và suy ngẫm — như một khung để tái lấy quyền kiểm soát ngày.",
+    "insights": [
+      {
+        "id": "five-am-club-i1",
+        "index": 1,
+        "title": "20–20–20 buổi sáng",
+        "body": "Chia giờ đầu thành các khối: chuyển động, suy ngẫm và học tập — giúp não vào nhịp trước khi thế giới đòi hỏi.",
+        "tags": ["buổi sáng", "năng suất"],
+        "relatedNodeIds": ["c-victoryHour", "c-ritualAm"]
+      },
+      {
+        "id": "five-am-club-i2",
+        "index": 2,
+        "title": "Bảo vệ giờ hoàng đạo",
+        "body": "Không phải ai cũng 5h, nhưng ý tưởng cốt lõi là có một khung thời gian ít bị xâm phạm để đầu tư vào bản thân.",
+        "tags": ["ranh giới", "ưu tiên"],
+        "relatedNodeIds": ["c-victoryHour"]
+      },
+      {
+        "id": "five-am-club-i3",
+        "index": 3,
+        "title": "Từ hỗn loạn đến kỷ luật hiền",
+        "body": "Kỷ luật không phải trừng phạt mà là thiết kế lại môi trường và cam kết nhỏ lặp lại cho đến khi chúng trở thành bản sắc.",
+        "tags": ["kỷ luật", "thiết kế"],
+        "relatedNodeIds": ["c-ritualAm"]
+      }
+    ],
+    "graph": {
+      "nodes": [
+        {
+          "id": "c-victoryHour",
+          "type": "concept",
+          "label": "Victory Hour",
+          "description": "Khối thời gian buổi sáng dành cho bản thân trước nhiễu loạn."
+        },
+        {
+          "id": "c-ritualAm",
+          "type": "concept",
+          "label": "Nghi thức buổi sáng",
+          "description": "Chuỗi hành động cố định giúp não khởi động có chủ đích."
+        },
+        {
+          "id": "c-twinCycle",
+          "type": "concept",
+          "label": "Vòng lặp cải thiện",
+          "description": "Học — thực hành — phản tỉnh để mỗi ngày tốt hơn một chút."
+        }
+      ],
+      "edges": [
+        { "from": "c-victoryHour", "to": "c-ritualAm", "relationLabel": "cấu thành" },
+        { "from": "c-ritualAm", "to": "c-twinCycle", "relationLabel": "nuôi dưỡng" }
+      ]
+    }
   }
 ]
 
